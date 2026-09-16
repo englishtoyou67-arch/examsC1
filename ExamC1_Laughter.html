@@ -1,0 +1,1271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IELTS Academic Lab: The Science of Humour & Laughter</title>
+<style>
+  :root {
+    --bg-main: #0b0f19;
+    --panel-bg: #151e32;
+    --accent: #38bdf8;
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+    --gold: #facc15;
+    --correct-bg: #15803d;
+    --incorrect-bg: #b91c1c;
+    --border-color: #334155;
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background-color: var(--bg-main);
+    color: var(--text-main);
+    padding: 24px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+  }
+
+  .app-container {
+    max-width: 1260px;
+    width: 100%;
+    background-color: var(--panel-bg);
+    border-radius: 16px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid #1e293b;
+  }
+
+  header {
+    background: #0f172a;
+    padding: 20px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid #334155;
+  }
+
+  .title-area h1 {
+    font-size: 1.35rem;
+    color: var(--accent);
+    letter-spacing: -0.5px;
+  }
+
+  .title-area p {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+  }
+
+  .hud {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .btn-shuffle {
+    background: #334155;
+    border: 1px solid #475569;
+    color: var(--text-main);
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+  }
+
+  .btn-shuffle:hover {
+    background: #475569;
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .coin-box {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #1e293b;
+    padding: 8px 16px;
+    border-radius: 9999px;
+    border: 1px solid var(--gold);
+  }
+
+  .coin-icon {
+    width: 22px;
+    height: 22px;
+    background: var(--gold);
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #854d0e;
+    font-weight: 900;
+    font-size: 14px;
+    box-shadow: 0 0 10px rgba(250, 204, 21, 0.6);
+  }
+
+  .coin-count {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--gold);
+  }
+
+  .main-layout {
+    display: grid;
+    grid-template-columns: 1.15fr 1fr;
+    gap: 24px;
+    padding: 24px;
+  }
+
+  /* Left Panel: Disaggregated Sentence Cards */
+  .reading-panel {
+    background: #0f172a;
+    padding: 24px;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .panel-top {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    border-bottom: 1px solid #334155;
+    padding-bottom: 12px;
+  }
+
+  .text-title-badge {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    font-weight: 800;
+    color: var(--accent);
+    letter-spacing: 0.8px;
+  }
+
+  .text-main-title {
+    font-size: 1.25rem;
+    color: #f1f5f9;
+    font-weight: 700;
+  }
+
+  .controls-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 4px;
+  }
+
+  .audio-controls {
+    display: flex;
+    gap: 10px;
+  }
+
+  .btn-audio {
+    background: #334155;
+    border: none;
+    color: #fff;
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: background 0.2s;
+  }
+
+  .btn-audio:hover {
+    background: #475569;
+  }
+
+  .sentence-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-height: 520px;
+    overflow-y: auto;
+    padding-right: 6px;
+  }
+
+  .sentence-stack::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .sentence-stack::-webkit-scrollbar-thumb {
+    background: #334155;
+    border-radius: 4px;
+  }
+
+  .sentence-card {
+    background: #1e293b;
+    padding: 14px 16px;
+    border-radius: 8px;
+    border-left: 4px solid #334155;
+    font-size: 0.95rem;
+    line-height: 1.7;
+    color: #cbd5e1;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    transition: all 0.3s ease;
+  }
+
+  .sentence-card.active-sentence {
+    border-left-color: var(--accent);
+    background: #24344d;
+    box-shadow: 0 4px 12px rgba(56, 189, 248, 0.15);
+  }
+
+  .sentence-num {
+    background: #0f172a;
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    font-weight: 800;
+    padding: 2px 7px;
+    border-radius: 4px;
+    border: 1px solid #334155;
+    flex-shrink: 0;
+    margin-top: 3px;
+  }
+
+  .sentence-card.active-sentence .sentence-num {
+    background: var(--accent);
+    color: #0b0f19;
+    border-color: var(--accent);
+  }
+
+  .sentence-content {
+    flex-grow: 1;
+  }
+
+  .target-collocation {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    text-decoration-thickness: 2px;
+    font-weight: 700;
+    padding: 2px 4px;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+  }
+
+  /* 12 Distinct Colors for Key Collocations */
+  .colloc-1 { color: #f87171; text-decoration-color: #f87171; }
+  .colloc-2 { color: #fb923c; text-decoration-color: #fb923c; }
+  .colloc-3 { color: #facc15; text-decoration-color: #facc15; }
+  .colloc-4 { color: #a3e635; text-decoration-color: #a3e635; }
+  .colloc-5 { color: #4ade80; text-decoration-color: #4ade80; }
+  .colloc-6 { color: #2dd4bf; text-decoration-color: #2dd4bf; }
+  .colloc-7 { color: #38bdf8; text-decoration-color: #38bdf8; }
+  .colloc-8 { color: #818cf8; text-decoration-color: #818cf8; }
+  .colloc-9 { color: #c084fc; text-decoration-color: #c084fc; }
+  .colloc-10 { color: #f472b6; text-decoration-color: #f472b6; }
+  .colloc-11 { color: #fb7185; text-decoration-color: #fb7185; }
+  .colloc-12 { color: #e879f9; text-decoration-color: #e879f9; }
+
+  .highlight-active {
+    background-color: rgba(56, 189, 248, 0.3);
+  }
+
+  /* Right Panel: Quiz Panel (Section 1) */
+  .quiz-panel {
+    background: #0f172a;
+    padding: 24px;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+
+  .step-badge {
+    background: #1e293b;
+    color: var(--accent);
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    border: 1px solid #334155;
+  }
+
+  .prompt-box {
+    background: #1e293b;
+    padding: 16px;
+    border-radius: 8px;
+    margin-bottom: 18px;
+    border-left: 4px solid var(--accent);
+    min-height: 70px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .prompt-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .prompt-content {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #38bdf8;
+  }
+
+  .options-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .option-btn {
+    padding: 13px 16px;
+    border-radius: 8px;
+    border: 2px solid #334155;
+    background: #1e293b;
+    color: #f8fafc;
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .option-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    border-color: #64748b;
+  }
+
+  .option-btn:disabled {
+    cursor: not-allowed;
+  }
+
+  .feedback-msg {
+    min-height: 24px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+
+  /* SECTION 2: Gap Fill Sequential Flow */
+  .section2-arena {
+    display: none;
+    padding: 28px;
+    flex-direction: column;
+    gap: 20px;
+    max-width: 900px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .sec2-header {
+    border-bottom: 1px solid #334155;
+    padding-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .sec2-header h2 {
+    font-size: 1.25rem;
+    color: var(--accent);
+  }
+
+  .sentence-focus-box {
+    background: #0f172a;
+    border-left: 4px solid var(--accent);
+    padding: 24px;
+    border-radius: 8px;
+    font-size: 1.15rem;
+    line-height: 1.9;
+    color: #f1f5f9;
+    border-top: 1px solid var(--border-color);
+    border-right: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .sentence-focus-box .clue-tag {
+    color: var(--gold);
+    font-weight: 700;
+    background: rgba(250, 204, 21, 0.15);
+    padding: 3px 8px;
+    border-radius: 4px;
+    border: 1px dashed var(--gold);
+  }
+
+  .sentence-focus-box .gap-blank {
+    color: var(--accent);
+    text-decoration: underline;
+    text-underline-offset: 5px;
+    font-weight: 800;
+  }
+
+  .chip-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .chip-label {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    font-weight: 700;
+  }
+
+  .chips-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .word-chip {
+    background: #1e293b;
+    border: 1px solid #475569;
+    color: #e2e8f0;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .word-chip:hover {
+    background: #334155;
+    border-color: var(--accent);
+    color: var(--accent);
+    transform: translateY(-2px);
+  }
+
+  .input-action-row {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .type-input {
+    flex-grow: 1;
+    background: #0f172a;
+    border: 2px solid #334155;
+    color: #fff;
+    padding: 14px 18px;
+    border-radius: 8px;
+    font-size: 1.05rem;
+    font-weight: 600;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .type-input:focus {
+    border-color: var(--accent);
+  }
+
+  .btn-submit {
+    background: var(--gold);
+    color: #713f12;
+    border: none;
+    font-weight: 800;
+    padding: 14px 26px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: opacity 0.2s;
+  }
+
+  .btn-submit:hover {
+    opacity: 0.9;
+  }
+
+  /* Screen Transitions & Rewards */
+  .result-panel {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 40px 20px;
+    gap: 18px;
+  }
+
+  .result-score {
+    font-size: 2.4rem;
+    color: var(--gold);
+    font-weight: 800;
+  }
+
+  .reward-badge-card {
+    background: #1e293b;
+    border-radius: 12px;
+    padding: 24px;
+    max-width: 580px;
+    border: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .badge-icon {
+    font-size: 3rem;
+  }
+
+  .badge-rank-title {
+    font-size: 1.4rem;
+    color: var(--accent);
+    font-weight: 800;
+  }
+
+  .badge-desc {
+    color: #cbd5e1;
+    font-size: 0.95rem;
+    line-height: 1.6;
+  }
+
+  .btn-action {
+    background: var(--accent);
+    color: #0b0f19;
+    border: none;
+    font-weight: 700;
+    padding: 12px 26px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: opacity 0.2s;
+  }
+
+  .btn-action:hover {
+    opacity: 0.9;
+  }
+
+  /* Animations */
+  @keyframes coinPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.4) rotate(15deg); }
+    100% { transform: scale(1); }
+  }
+
+  .animate-coin {
+    animation: coinPulse 0.4s ease-out;
+  }
+
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-6px); }
+    40%, 80% { transform: translateX(6px); }
+  }
+
+  .animate-shake {
+    animation: shake 0.4s ease-in-out;
+  }
+</style>
+</head>
+<body>
+
+<div class="app-container">
+  <header>
+    <div class="title-area">
+      <h1>IELTS Academic Lab: The Science of Humour</h1>
+      <p>Collocation Mastery • Sentence Scaffolding • Active Recall Gap-Fill</p>
+    </div>
+    <div class="hud">
+      <button class="btn-shuffle" id="btn-shuffle" title="Shuffle test items">
+        <span>🔀</span> Shuffle Set
+      </button>
+      <div class="coin-box">
+        <span class="coin-icon" id="coin-graphic">🪙</span>
+        <span class="coin-count" id="score-display">0 / 24</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- SECTION 1: Sentence Breakdown & Definition Match -->
+  <div class="main-layout" id="game-arena">
+    <!-- Left: Disaggregated Sentence Stack -->
+    <div class="reading-panel">
+      <div class="panel-top">
+        <span class="text-title-badge">Academic Reading Summary</span>
+        <h2 class="text-main-title">Having a Laugh: The Psychological Value of Humour</h2>
+        <div class="controls-bar">
+          <span style="font-size: 0.8rem; color: var(--text-muted);">Disaggregated Sentence Stack (12 Collocations)</span>
+          <div class="audio-controls">
+            <button class="btn-audio" id="btn-play">▶ Play All</button>
+            <button class="btn-audio" id="btn-pause">⏸ Pause</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="sentence-stack" id="sentence-container">
+        <!-- Sentence 1 -->
+        <div class="sentence-card" id="sent-card-1">
+          <span class="sentence-num">S1</span>
+          <div class="sentence-content">
+            Research into human behavior reveals that laughter is an essential evolutionary adaptation that profoundly shapes 
+            <span class="target-collocation colloc-1" id="colloc-span-1">social perception</span>.
+          </div>
+        </div>
+
+        <!-- Sentence 2 -->
+        <div class="sentence-card" id="sent-card-2">
+          <span class="sentence-num">S2</span>
+          <div class="sentence-content">
+            Across 
+            <span class="target-collocation colloc-2" id="colloc-span-2">diverse societies</span>, experiments show that listeners are 
+            <span class="target-collocation colloc-3" id="colloc-span-3">remarkably consistent</span> at decoding the friendship status between laughers.
+          </div>
+        </div>
+
+        <!-- Sentence 3 -->
+        <div class="sentence-card" id="sent-card-3">
+          <span class="sentence-num">S3</span>
+          <div class="sentence-content">
+            Laughter also serves as an audible code within any human 
+            <span class="target-collocation colloc-4" id="colloc-span-4">social hierarchy</span>.
+          </div>
+        </div>
+
+        <!-- Sentence 4 -->
+        <div class="sentence-card" id="sent-card-4">
+          <span class="sentence-num">S4</span>
+          <div class="sentence-content">
+            High-status individuals routinely exhibit 
+            <span class="target-collocation colloc-5" id="colloc-span-5">dominant laughter</span>, whereas newcomers naturally display 
+            <span class="target-collocation colloc-6" id="colloc-span-6">submissive laughter</span> unless placed in a teasing role.
+          </div>
+        </div>
+
+        <!-- Sentence 5 -->
+        <div class="sentence-card" id="sent-card-5">
+          <span class="sentence-num">S5</span>
+          <div class="sentence-content">
+            In that powerful position, low-status members can 
+            <span class="target-collocation colloc-7" id="colloc-span-7">strategically display</span> louder laughs to elevate how others view their social rank.
+          </div>
+        </div>
+
+        <!-- Sentence 6 -->
+        <div class="sentence-card" id="sent-card-6">
+          <span class="sentence-num">S6</span>
+          <div class="sentence-content">
+            Beyond social rank, when workers face an inherently 
+            <span class="target-collocation colloc-8" id="colloc-span-8">tedious task</span> that would otherwise 
+            <span class="target-collocation colloc-9" id="colloc-span-9">require persistence</span> to the point of exhaustion, humorous videos 
+            <span class="target-collocation colloc-10" id="colloc-span-10">provide a respite</span> from monotonous duty.
+          </div>
+        </div>
+
+        <!-- Sentence 7 -->
+        <div class="sentence-card" id="sent-card-7">
+          <span class="sentence-num">S7</span>
+          <div class="sentence-content">
+            Far from causing a harmful distraction, this brief comedy break facilitates 
+            <span class="target-collocation colloc-11" id="colloc-span-11">mental replenishment</span>, generating a measurable 
+            <span class="target-collocation colloc-12" id="colloc-span-12">energising effect</span> that boosts sustained task performance.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Section 1 Multiple Choice Panel -->
+    <div class="quiz-panel" id="quiz-box">
+      <div>
+        <div class="card-header">
+          <span class="step-badge" id="sec1-progress">Challenge 1 / 12</span>
+          <span style="font-size: 0.8rem; color: var(--text-muted);">Section 1: Recognition</span>
+        </div>
+
+        <div class="prompt-box">
+          <div class="prompt-label">Target Academic Collocation</div>
+          <div class="prompt-content" id="target-term-display">Loading term...</div>
+        </div>
+
+        <div class="options-grid" id="options-container">
+          <!-- Populated dynamically with 4 colored buttons -->
+        </div>
+      </div>
+
+      <div>
+        <div class="feedback-msg" id="sec1-feedback"></div>
+      </div>
+    </div>
+
+    <!-- Intermediate Gate: Proceed to Section 2 -->
+    <div class="result-panel" id="mid-gate-screen">
+      <h2>Section 1 Complete!</h2>
+      <div class="result-score" id="sec1-mid-score">0 / 12 Coins</div>
+      <p style="color: #cbd5e1; max-width: 500px; line-height: 1.6;">
+        You have completed the recognition phase. Now proceed to Section 2: Active Recall Gap-Fill, where the collocations are removed and replaced with their operational definitions!
+      </p>
+      <button class="btn-action" id="btn-start-sec2">Proceed to Section 2: Active Gap-Fill ➔</button>
+    </div>
+  </div>
+
+  <!-- SECTION 2: Gap-Fill Sequential Arena -->
+  <div class="section2-arena" id="sec2-arena">
+    <div class="sec2-header">
+      <h2>Section 2: Active Recall & Production</h2>
+      <span class="step-badge" id="sec2-progress">Gap 1 / 12</span>
+    </div>
+
+    <div class="sentence-focus-box" id="sec2-sentence-display">
+      <!-- Injected dynamically with definition clues in brackets -->
+    </div>
+
+    <div class="chip-container">
+      <div class="chip-label">Available Collocation Chips (Click to fill or type below):</div>
+      <div class="chips-grid" id="sec2-chips-container">
+        <!-- 6 randomized chips (1 correct + 5 distractors) -->
+      </div>
+    </div>
+
+    <div class="input-action-row">
+      <input type="text" class="type-input" id="sec2-input" placeholder="Type the matching collocation here..." autocomplete="off">
+      <button class="btn-submit" id="btn-sec2-submit">Confirm</button>
+    </div>
+
+    <div class="feedback-msg" id="sec2-feedback"></div>
+  </div>
+
+  <!-- FINAL REWARD & SCORE PANEL -->
+  <div class="result-panel" id="final-screen">
+    <h2>Exploration Assessment Complete</h2>
+    <div class="result-score" id="final-total-score">0 / 24</div>
+    
+    <div class="reward-badge-card">
+      <div class="badge-icon" id="badge-icon">🎖️</div>
+      <div class="badge-rank-title" id="badge-title">Evaluating Explorer...</div>
+      <div class="badge-desc" id="badge-desc">Analyzing accuracy metrics...</div>
+    </div>
+
+    <button class="btn-action" id="btn-restart-all" style="margin-top: 10px;">Restart Full Assessment</button>
+  </div>
+</div>
+
+<script>
+  // Web Audio Context for Procedural Effects
+  const AudioEngine = {
+    ctx: null,
+    init() {
+      if (!this.ctx) {
+        this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    },
+    playCorrect() {
+      this.init();
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(523.25, this.ctx.currentTime); // C5
+      osc.frequency.exponentialRampToValueAtTime(783.99, this.ctx.currentTime + 0.12); // G5
+      gain.gain.setValueAtTime(0.3, this.ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.35);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start();
+      osc.stop(this.ctx.currentTime + 0.35);
+    },
+    playIncorrect() {
+      this.init();
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(180, this.ctx.currentTime);
+      osc.frequency.linearRampToValueAtTime(110, this.ctx.currentTime + 0.25);
+      gain.gain.setValueAtTime(0.3, this.ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.25);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start();
+      osc.stop(this.ctx.currentTime + 0.25);
+    }
+  };
+
+  const optionColors = [
+    { bg: "#1e3a8a", border: "#3b82f6" }, // Sapphire
+    { bg: "#312e81", border: "#6366f1" }, // Indigo
+    { bg: "#064e3b", border: "#10b981" }, // Emerald
+    { bg: "#701a75", border: "#d946ef" }  // Fuchsia
+  ];
+
+  // The 12 Key Collocations & Definitions Dataset
+  const vocabularyData = [
+    {
+      id: 1,
+      sentenceId: 1,
+      term: "social perception",
+      definition: "how people understand each other",
+      before: "Research into human behavior reveals that laughter is an essential evolutionary adaptation that profoundly shapes ",
+      after: "."
+    },
+    {
+      id: 2,
+      sentenceId: 2,
+      term: "diverse societies",
+      definition: "very different groups of people",
+      before: "Across ",
+      after: ", experiments show that listeners are remarkably consistent at decoding friendship."
+    },
+    {
+      id: 3,
+      sentenceId: 2,
+      term: "remarkably consistent",
+      definition: "almost always the same result",
+      before: "Across diverse societies, experiments show that listeners are ",
+      after: " at decoding the friendship status between laughers."
+    },
+    {
+      id: 4,
+      sentenceId: 3,
+      term: "social hierarchy",
+      definition: "system of higher, lower ranks",
+      before: "Laughter also serves as an audible code within any human ",
+      after: "."
+    },
+    {
+      id: 5,
+      sentenceId: 4,
+      term: "dominant laughter",
+      definition: "louder laugh showing power",
+      before: "High-status individuals routinely exhibit ",
+      after: ", whereas newcomers display submissive laughter."
+    },
+    {
+      id: 6,
+      sentenceId: 4,
+      term: "submissive laughter",
+      definition: "quiet laugh showing lower status",
+      before: "High-status individuals exhibit dominant laughter, whereas newcomers naturally display ",
+      after: " unless placed in a teasing role."
+    },
+    {
+      id: 7,
+      sentenceId: 5,
+      term: "strategically display",
+      definition: "show something carefully for advantage",
+      before: "In that powerful position, low-status members can ",
+      after: " louder laughs to elevate how others view their social rank."
+    },
+    {
+      id: 8,
+      sentenceId: 6,
+      term: "tedious task",
+      definition: "boring and slow work",
+      before: "Beyond social rank, when workers face an inherently ",
+      after: " that would otherwise require persistence, comedy helps."
+    },
+    {
+      id: 9,
+      sentenceId: 6,
+      term: "require persistence",
+      definition: "need continuing effort without stopping",
+      before: "When workers face a tedious task that would otherwise ",
+      after: " to the point of exhaustion, humorous videos provide a respite."
+    },
+    {
+      id: 10,
+      sentenceId: 6,
+      term: "provide a respite",
+      definition: "give a short restful break",
+      before: "When workers face exhausting duties, humorous videos ",
+      after: " from monotonous duty."
+    },
+    {
+      id: 11,
+      sentenceId: 7,
+      term: "mental replenishment",
+      definition: "getting your brain energy back",
+      before: "Far from causing a harmful distraction, this brief comedy break facilitates ",
+      after: ", generating a measurable energising effect."
+    },
+    {
+      id: 12,
+      sentenceId: 7,
+      term: "energising effect",
+      definition: "result that gives fresh power",
+      before: "This brief comedy break facilitates mental replenishment, generating a measurable ",
+      after: " that boosts sustained task performance."
+    }
+  ];
+
+  // Game State Variables
+  let totalCoins = 0;
+  let sec1Items = [...vocabularyData];
+  let sec1Index = 0;
+  let sec1Answered = false;
+
+  let sec2Items = [...vocabularyData];
+  let sec2Index = 0;
+  let sec2Answered = false;
+
+  // DOM Elements
+  const scoreDisplay = document.getElementById("score-display");
+  const coinGraphic = document.getElementById("coin-graphic");
+  const btnShuffle = document.getElementById("btn-shuffle");
+
+  // Section 1 DOM
+  const gameArena = document.getElementById("game-arena");
+  const quizBox = document.getElementById("quiz-box");
+  const sec1Progress = document.getElementById("sec1-progress");
+  const targetTermDisplay = document.getElementById("target-term-display");
+  const optionsContainer = document.getElementById("options-container");
+  const sec1Feedback = document.getElementById("sec1-feedback");
+  const midGateScreen = document.getElementById("mid-gate-screen");
+  const sec1MidScore = document.getElementById("sec1-mid-score");
+  const btnStartSec2 = document.getElementById("btn-start-sec2");
+
+  // Section 2 DOM
+  const sec2Arena = document.getElementById("sec2-arena");
+  const sec2Progress = document.getElementById("sec2-progress");
+  const sec2SentenceDisplay = document.getElementById("sec2-sentence-display");
+  const sec2ChipsContainer = document.getElementById("sec2-chips-container");
+  const sec2Input = document.getElementById("sec2-input");
+  const btnSec2Submit = document.getElementById("btn-sec2-submit");
+  const sec2Feedback = document.getElementById("sec2-feedback");
+
+  // Final Screen DOM
+  const finalScreen = document.getElementById("final-screen");
+  const finalTotalScore = document.getElementById("final-total-score");
+  const badgeIcon = document.getElementById("badge-icon");
+  const badgeTitle = document.getElementById("badge-title");
+  const badgeDesc = document.getElementById("badge-desc");
+  const btnRestartAll = document.getElementById("btn-restart-all");
+
+  // Speech Synthesis Controls
+  const btnPlay = document.getElementById("btn-play");
+  const btnPause = document.getElementById("btn-pause");
+  let speechUtterance = null;
+
+  function getAllSummaryText() {
+    let full = "";
+    document.querySelectorAll(".sentence-content").forEach(c => full += c.innerText + " ");
+    return full;
+  }
+
+  function initTTS() {
+    if ('speechSynthesis' in window) {
+      speechUtterance = new SpeechSynthesisUtterance(getAllSummaryText());
+      speechUtterance.rate = 0.95;
+      speechUtterance.lang = 'en-GB';
+    }
+  }
+
+  btnPlay.addEventListener("click", () => {
+    if (!('speechSynthesis' in window)) return;
+    if (window.speechSynthesis.paused) {
+      window.speechSynthesis.resume();
+    } else {
+      window.speechSynthesis.cancel();
+      initTTS();
+      window.speechSynthesis.speak(speechUtterance);
+    }
+  });
+
+  btnPause.addEventListener("click", () => {
+    if ('speechSynthesis' in window && window.speechSynthesis.speaking) {
+      window.speechSynthesis.pause();
+    }
+  });
+
+  // Utility Shuffle
+  function shuffle(array) {
+    let arr = [...array];
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  function awardCoin() {
+    totalCoins++;
+    scoreDisplay.innerText = `${totalCoins} / 24`;
+    coinGraphic.classList.add("animate-coin");
+    setTimeout(() => coinGraphic.classList.remove("animate-coin"), 400);
+  }
+
+  // Shuffle All Action
+  btnShuffle.addEventListener("click", () => {
+    sec1Items = shuffle(vocabularyData);
+    sec1Index = 0;
+    sec2Items = shuffle(vocabularyData);
+    sec2Index = 0;
+    totalCoins = 0;
+    scoreDisplay.innerText = `0 / 24`;
+    loadSec1Item(sec1Index);
+
+    sec1Feedback.innerText = "🔀 Items randomized! Fresh sequence loaded.";
+    sec1Feedback.style.color = "var(--accent)";
+    setTimeout(() => {
+      if (sec1Feedback.innerText.includes("randomized")) sec1Feedback.innerText = "";
+    }, 1800);
+  });
+
+  // SECTION 1 LOGIC
+  function loadSec1Item(index) {
+    sec1Answered = false;
+    sec1Feedback.innerText = "";
+    sec1Feedback.style.color = "";
+
+    document.querySelectorAll(".sentence-card").forEach(card => card.classList.remove("active-sentence"));
+    document.querySelectorAll(".target-collocation").forEach(span => span.classList.remove("highlight-active"));
+
+    const item = sec1Items[index];
+    sec1Progress.innerText = `Challenge ${index + 1} / ${sec1Items.length}`;
+    targetTermDisplay.innerText = item.term;
+
+    const activeSentence = document.getElementById(`sent-card-${item.sentenceId}`);
+    if (activeSentence) {
+      activeSentence.classList.add("active-sentence");
+      activeSentence.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+
+    const activeSpan = document.getElementById(`colloc-span-${item.id}`);
+    if (activeSpan) {
+      activeSpan.classList.add("highlight-active");
+    }
+
+    // Pick 3 random definition distractors from other items
+    const otherDefs = vocabularyData.filter(v => v.id !== item.id).map(v => v.definition);
+    const shuffledOthers = shuffle(otherDefs);
+    const choices = shuffle([item.definition, shuffledOthers[0], shuffledOthers[1], shuffledOthers[2]]);
+
+    optionsContainer.innerHTML = "";
+    choices.forEach((choice, idx) => {
+      const btn = document.createElement("button");
+      btn.className = "option-btn";
+      btn.innerText = choice;
+      const theme = optionColors[idx % optionColors.length];
+      btn.style.backgroundColor = theme.bg;
+      btn.style.borderColor = theme.border;
+
+      btn.addEventListener("click", () => handleSec1Selection(btn, choice, item.definition));
+      optionsContainer.appendChild(btn);
+    });
+  }
+
+  function handleSec1Selection(selectedBtn, chosenDef, correctDef) {
+    if (sec1Answered) return;
+    sec1Answered = true;
+
+    const allBtns = optionsContainer.querySelectorAll(".option-btn");
+    allBtns.forEach(b => b.disabled = true);
+
+    if (chosenDef === correctDef) {
+      selectedBtn.style.backgroundColor = "var(--correct-bg)";
+      selectedBtn.style.borderColor = "#22c55e";
+      sec1Feedback.innerText = "✓ Exact match! 1 Coin earned.";
+      sec1Feedback.style.color = "#4ade80";
+      awardCoin();
+      AudioEngine.playCorrect();
+    } else {
+      selectedBtn.style.backgroundColor = "var(--incorrect-bg)";
+      selectedBtn.style.borderColor = "#ef4444";
+      sec1Feedback.innerText = `✕ Incorrect. Correct meaning: "${correctDef}"`;
+      sec1Feedback.style.color = "#f87171";
+
+      allBtns.forEach(b => {
+        if (b.innerText === correctDef) {
+          b.style.backgroundColor = "var(--correct-bg)";
+          b.style.borderColor = "#22c55e";
+        }
+      });
+
+      quizBox.classList.add("animate-shake");
+      setTimeout(() => quizBox.classList.remove("animate-shake"), 400);
+      AudioEngine.playIncorrect();
+    }
+
+    setTimeout(() => {
+      sec1Index++;
+      if (sec1Index < sec1Items.length) {
+        loadSec1Item(sec1Index);
+      } else {
+        showSec1MidGate();
+      }
+    }, 1500);
+  }
+
+  function showSec1MidGate() {
+    quizBox.style.display = "none";
+    midGateScreen.style.display = "flex";
+    sec1MidScore.innerText = `${totalCoins} / 12 Coins Acquired`;
+  }
+
+  btnStartSec2.addEventListener("click", () => {
+    gameArena.style.display = "none";
+    sec2Arena.style.display = "flex";
+    sec2Index = 0;
+    loadSec2Item(sec2Index);
+  });
+
+  // SECTION 2 LOGIC (Sequential Gap Fill)
+  function loadSec2Item(index) {
+    sec2Answered = false;
+    sec2Feedback.innerText = "";
+    sec2Feedback.style.color = "";
+    sec2Input.value = "";
+    sec2Input.disabled = false;
+    btnSec2Submit.disabled = false;
+    sec2Input.focus();
+
+    const item = sec2Items[index];
+    sec2Progress.innerText = `Gap ${index + 1} / ${sec2Items.length}`;
+
+    // Render sentence with definition in brackets
+    sec2SentenceDisplay.innerHTML = `
+      ${item.before}
+      <span class="gap-blank">[ ____________ ]</span> 
+      <span class="clue-tag">(${item.definition})</span>
+      ${item.after}
+    `;
+
+    // 6 Collocation Chips: 1 target + 5 random distractors
+    const otherTerms = vocabularyData.filter(v => v.id !== item.id).map(v => v.term);
+    const shuffledOthers = shuffle(otherTerms).slice(0, 5);
+    const chipChoices = shuffle([item.term, ...shuffledOthers]);
+
+    sec2ChipsContainer.innerHTML = "";
+    chipChoices.forEach(term => {
+      const chip = document.createElement("button");
+      chip.className = "word-chip";
+      chip.innerText = term;
+      chip.addEventListener("click", () => {
+        if (!sec2Answered) {
+          sec2Input.value = term;
+          sec2Input.focus();
+        }
+      });
+      sec2ChipsContainer.appendChild(chip);
+    });
+  }
+
+  function handleSec2Submit() {
+    if (sec2Answered) return;
+
+    const userInput = sec2Input.value.trim().toLowerCase();
+    if (!userInput) {
+      sec2Feedback.innerText = "Please type or click a chip before confirming.";
+      sec2Feedback.style.color = "var(--gold)";
+      return;
+    }
+
+    sec2Answered = true;
+    sec2Input.disabled = true;
+    btnSec2Submit.disabled = true;
+
+    const item = sec2Items[sec2Index];
+    const isCorrect = (userInput === item.term.toLowerCase());
+
+    if (isCorrect) {
+      sec2Feedback.innerText = `✓ Excellent! "${item.term}" fits the academic context accurately.`;
+      sec2Feedback.style.color = "#4ade80";
+      sec2SentenceDisplay.querySelector(".gap-blank").innerText = `[ ${item.term} ]`;
+      sec2SentenceDisplay.querySelector(".gap-blank").style.color = "#4ade80";
+      awardCoin();
+      AudioEngine.playCorrect();
+    } else {
+      sec2Feedback.innerText = `✕ Incorrect. The required academic collocation is "${item.term}".`;
+      sec2Feedback.style.color = "#f87171";
+      sec2SentenceDisplay.querySelector(".gap-blank").innerText = `[ ${item.term} ]`;
+      sec2SentenceDisplay.querySelector(".gap-blank").style.color = "#f87171";
+      sec2Arena.classList.add("animate-shake");
+      setTimeout(() => sec2Arena.classList.remove("animate-shake"), 400);
+      AudioEngine.playIncorrect();
+    }
+
+    setTimeout(() => {
+      sec2Index++;
+      if (sec2Index < sec2Items.length) {
+        loadSec2Item(sec2Index);
+      } else {
+        showFinalResults();
+      }
+    }, 1800);
+  }
+
+  btnSec2Submit.addEventListener("click", handleSec2Submit);
+  sec2Input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") handleSec2Submit();
+  });
+
+  // FINAL REWARDS & EVALUATION
+  function showFinalResults() {
+    sec2Arena.style.display = "none";
+    finalScreen.style.display = "flex";
+
+    const totalPossible = 24;
+    const percentage = Math.round((totalCoins / totalPossible) * 100);
+    finalTotalScore.innerText = `${totalCoins} / ${totalPossible} Coins (${percentage}%)`;
+
+    let icon = "🎖️";
+    let title = "";
+    let desc = "";
+
+    if (percentage >= 88) {
+      icon = "👑";
+      title = `Grandmaster Linguistic Explorer (${percentage}%)`;
+      desc = "Flawless lexical command! You demonstrated Band 8.5–9.0 precision in mapping operational definitions and reproducing exact academic collocations in context.";
+    } else if (percentage >= 75) {
+      icon = "🧭";
+      title = `Effective Academic Explorer (${percentage}%)`;
+      desc = "Strong performance! You have a solid grasp of social hierarchy lexis, cognitive recovery terms, and academic discourse markers suitable for C1 / Band 7.5–8.0.";
+    } else if (percentage >= 60) {
+      icon = "🎒";
+      title = `Developing Field Explorer (${percentage}%)`;
+      desc = "Competent recognition base (B2 / Band 6.5). While multiple-choice recognition was steady, active recall in Section 2 revealed minor confusion among status collocations.";
+    } else {
+      icon = "📖";
+      title = `Apprentice Explorer (${percentage}%)`;
+      desc = "Diagnostic need identified. Revisit the disaggregated sentences and review the Form-Meaning-Use mappings before attempting IELTS Speaking Part 3 discourse.";
+    }
+
+    badgeIcon.innerText = icon;
+    badgeTitle.innerText = title;
+    badgeDesc.innerText = desc;
+  }
+
+  btnRestartAll.addEventListener("click", () => {
+    totalCoins = 0;
+    scoreDisplay.innerText = `0 / 24`;
+    finalScreen.style.display = "none";
+    midGateScreen.style.display = "none";
+    quizBox.style.display = "flex";
+    gameArena.style.display = "grid";
+
+    sec1Index = 0;
+    sec2Index = 0;
+    sec1Items = [...vocabularyData];
+    sec2Items = [...vocabularyData];
+
+    loadSec1Item(sec1Index);
+  });
+
+  // Initialization
+  initTTS();
+  loadSec1Item(sec1Index);
+</script>
+</body>
+</html>
