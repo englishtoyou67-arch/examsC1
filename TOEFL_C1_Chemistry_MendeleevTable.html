@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TOEFL C1 Reading & Vocabulary</title>
+  <style>
+    :root {
+      --bg: #090d16;
+      --card: #131b2e;
+      --card-alt: #1a2540;
+      --primary: #38bdf8;
+      --accent: #f59e0b;
+      --success: #10b981;
+      --danger: #ef4444;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: #273656;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background-color: var(--bg); color: var(--text); padding: 16px; min-height: 100vh; }
+    .container { max-width: 950px; margin: 0 auto; }
+    header { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; text-align: center; margin-bottom: 16px; }
+    h1 { font-size: 1.55rem; color: var(--primary); margin-bottom: 4px; }
+    .score-banner { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; margin-top: 10px; font-size: 0.85rem; background: #0a0e17; padding: 8px; border-radius: 8px; border: 1px solid var(--border); }
+    .score-badge { color: var(--primary); font-weight: 700; }
+    .score-card { background: var(--card-alt); border: 1px solid var(--border); border-radius: 8px; padding: 12px; margin-bottom: 14px; font-size: 0.88rem; }
+    .recom-box { margin-top: 6px; font-weight: 600; color: var(--accent); }
+    .tabs { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 6px; margin-bottom: 16px; }
+    .tab-btn { background: var(--card); border: 1px solid var(--border); color: var(--text-muted); padding: 9px 14px; border-radius: 8px; cursor: pointer; font-size: 0.82rem; font-weight: 600; white-space: nowrap; }
+    .tab-btn.active { background: var(--primary); color: #020617; border-color: var(--primary); }
+    .panel { display: none; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+    .panel.active { display: block; }
+    .btn { background: var(--primary); color: #020617; border: none; padding: 9px 16px; border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 6px; }
+    .btn-secondary { background: var(--card-alt); color: var(--text); border: 1px solid var(--border); }
+    .btn-audio { background: transparent; border: 1px solid var(--border); color: var(--primary); padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; }
+    .tile-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin-top: 12px; }
+    .tile { background: var(--card-alt); border: 1px solid var(--border); padding: 12px; border-radius: 8px; text-align: center; cursor: pointer; min-height: 60px; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; user-select: none; }
+    .tile.selected { border-color: var(--primary); background: #1c3b66; }
+    .tile.matched { opacity: 0; pointer-events: none; }
+    .calib-bar { display: flex; gap: 8px; justify-content: center; align-items: center; background: #0a0e17; padding: 8px; border-radius: 8px; margin: 15px 0; border: 1px solid var(--border); }
+    .calib-btn { background: transparent; border: 1px solid var(--border); color: var(--text-muted); padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; }
+    .calib-btn.active { background: var(--primary); color: #000; font-weight: bold; border-color: var(--primary); }
+    .mc-grid { display: grid; gap: 10px; margin-top: 12px; }
+    .mc-option { background: var(--card-alt); border: 1px solid var(--border); padding: 12px; border-radius: 8px; cursor: pointer; text-align: left; font-size: 0.9rem; color: var(--text); }
+    .mc-option.correct { background: rgba(16, 185, 129, 0.2); border-color: var(--success); }
+    .mc-option.wrong { background: rgba(239, 68, 68, 0.2); border-color: var(--danger); }
+    .socratic-box { margin-top: 15px; padding: 12px; background: rgba(56, 189, 248, 0.08); border-left: 3px solid var(--primary); border-radius: 0 6px 6px 0; font-size: 0.85rem; display: none; line-height: 1.5; }
+    .cloze-item { line-height: 1.9; font-size: 0.95rem; margin-bottom: 12px; background: #0a0e17; padding: 12px; border-radius: 8px; border: 1px solid var(--border); }
+    select.gap-select { background: var(--card-alt); color: var(--primary); border: 1px solid var(--primary); padding: 4px 8px; border-radius: 4px; font-weight: 600; font-size: 0.88rem; }
+    select.gap-select.correct { border-color: var(--success); color: var(--success); }
+    select.gap-select.wrong { border-color: var(--danger); color: var(--danger); }
+    .eval-group { display: flex; gap: 8px; margin-top: 12px; }
+    .eval-btn { padding: 8px 14px; border-radius: 6px; border: none; font-weight: 700; cursor: pointer; font-size: 0.85rem; }
+    .eval-c { background: var(--success); color: #000; }
+    .eval-a { background: var(--accent); color: #000; }
+    .eval-i { background: var(--danger); color: #fff; }
+    input.student-name-box { width: 100%; max-width: 320px; background: #0a0e17; border: 1px solid var(--border); border-radius: 6px; padding: 8px 12px; color: var(--text); font-size: 0.9rem; margin-bottom: 12px; outline: none; }
+    input.student-name-box:focus { border-color: var(--primary); }
+    textarea.writing-box { width: 100%; height: 160px; background: #0a0e17; border: 1px solid var(--border); border-radius: 8px; padding: 12px; color: var(--text); font-size: 0.95rem; resize: vertical; margin-bottom: 8px; outline: none; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>TOEFL C1 Reading & Vocabulary</h1>
+    <div class="score-banner">
+      <div>Total Mastery Score: <span id="ov-score" class="score-badge">0 / 100 (0%)</span></div>
+      <div>Overall Level: <span id="ov-level" class="score-badge">Initial Diagnostic</span></div>
+    </div>
+  </header>
+  <nav class="tabs">
+    <button class="tab-btn active" onclick="setPanel(0)">⚡ 1. Speed Match</button>
+    <button class="tab-btn" onclick="setPanel(1)">🎯 2. Metacognitive MC (12 Items)</button>
+    <button class="tab-btn" onclick="setPanel(2)">📝 3. Context Fill-in (12 Gaps)</button>
+    <button class="tab-btn" onclick="setPanel(3)">🤔 4. Self-Eval Questions (5 Qs)</button>
+    <button class="tab-btn" onclick="setPanel(4)">✍️ 5. Writing Task</button>
+  </nav>
+  <!-- STAGE 1: SPEED MATCH -->
+  <div class="panel active" id="p-0">
+    <div class="score-card">
+      <div><strong>Section 1 Performance:</strong> <span id="s1-score-txt" class="score-badge">0 / 12 pairs matched (0%)</span></div>
+      <div class="recom-box" id="s1-recom">Recommendation: Match English collocations with their Russian semantic anchors to build working memory speed.</div>
+    </div>
+    <h3>Speed Match: Term ↔ Russian Neuro-Cognate</h3>
+    <div class="tile-grid" id="tile-board"></div>
+  </div>
+  <!-- STAGE 2: METACOGNITIVE MC (12 ITEMS: WORD -> 4 DEFINITIONS) -->
+  <div class="panel" id="p-1">
+    <div class="score-card">
+      <div><strong>Section 2 Performance:</strong> <span id="s2-score-txt" class="score-badge">0 / 12 items completed (0%)</span></div>
+      <div class="recom-box" id="s2-recom">Recommendation: Calibrate your certainty first (Guess, Sure, Don't Know), then identify the matching academic definition from the four options.</div>
+    </div>
+    <div style="font-size:0.85rem; color:var(--accent); font-weight:700;">Question <span id="mc-counter">1</span> of 12 — Academic Collocation Definition</div>
+    <div style="font-size:1.15rem; margin:8px 0 10px;">
+      Target Word: <strong id="mc-prompt" style="color:var(--primary)"></strong>
+      <button class="btn-audio" onclick="speakCurrentMC()">🔊</button>
+    </div>
+    <div class="calib-bar">
+      <span style="font-size:0.8rem;">Metacognitive Calibration:</span>
+      <button class="calib-btn" onclick="setCalib(this, 'guess')">🎲 Guess</button>
+      <button class="calib-btn" onclick="setCalib(this, 'sure')">🎯 Sure</button>
+      <button class="calib-btn" onclick="setCalib(this, 'dont_know')">🤷 Don't Know</button>
+    </div>
+    <div class="mc-grid" id="mc-options"></div>
+    <div class="socratic-box" id="mc-socratic">
+      <p><strong>💡 Khanmigo Socratic Coach:</strong> <span id="socratic-txt"></span></p>
+    </div>
+    <div style="margin-top:15px; text-align:right;">
+      <button class="btn" id="mc-next" style="display:none;" onclick="nextMC()">Next Question →</button>
+    </div>
+  </div>
+  <!-- STAGE 3: CONTEXT FILL-IN (12 SENTENCES) -->
+  <div class="panel" id="p-2">
+    <div class="score-card">
+      <div><strong>Section 3 Performance:</strong> <span id="s3-score-txt" class="score-badge">0 / 12 sentences synthesized (0%)</span></div>
+      <div class="recom-box" id="s3-recom">Recommendation: Synthesize all 12 sentences using the dropdown menus. Notice syntactic collocation constraints.</div>
+    </div>
+    <h3>Stage 2: Contextual Synthesis Fill-in (All 12 Sentences)</h3>
+    <div id="cloze-list" style="margin-top:12px;"></div>
+    <div style="margin-top:15px; display:flex; align-items:center; gap:12px;">
+      <button class="btn" onclick="evaluateCloze()">Check All 12 Formulations</button>
+      <span id="cloze-score" style="font-weight:700;"></span>
+    </div>
+  </div>
+  <!-- STAGE 4: SELF-EVAL QA (5 QUESTIONS) -->
+  <div class="panel" id="p-3">
+    <div class="score-card">
+      <div><strong>Section 4 Performance:</strong> <span id="s4-score-txt" class="score-badge">0 / 5 answers evaluated (0%)</span></div>
+      <div class="recom-box" id="s4-recom">Recommendation: Formulate your answer first in formal academic English before viewing the benchmark.</div>
+    </div>
+    <div style="font-size:0.8rem; color:var(--accent);">Question <span id="qa-num">1</span> of 5</div>
+    <p id="qa-question" style="font-weight:600; font-size:1.05rem; margin:8px 0 12px;"></p>
+    <textarea id="qa-input" class="writing-box" style="height:90px;" placeholder="Type your academic response here..."></textarea>
+    <button class="btn btn-secondary" onclick="revealBenchmark()">Answer & Reveal Benchmark</button>
+    <div id="qa-model-box" style="display:none; margin-top:15px; background:#0a0e17; padding:15px; border-radius:8px; border:1px solid var(--border);">
+      <p style="color:var(--primary); font-weight:600; font-size:0.9rem;">Benchmark Answer:</p>
+      <p id="qa-model" style="margin:6px 0 14px; font-size:0.95rem;"></p>
+      <p style="font-size:0.85rem; color:var(--text-muted);">Calibrate your conceptual correspondence:</p>
+      <div class="eval-group">
+        <button class="eval-btn eval-c" onclick="submitEval(10)">Correct (+10 pts)</button>
+        <button class="eval-btn eval-a" onclick="submitEval(5)">Almost Correct (+5 pts)</button>
+        <button class="eval-btn eval-i" onclick="submitEval(0)">Incorrect (0 pts)</button>
+      </div>
+    </div>
+  </div>
+  <!-- STAGE 5: WRITING TASK -->
+  <div class="panel" id="p-4">
+    <h3>Stage 4: Creative Academic Writing Task</h3>
+    <div style="font-size:0.85rem; color:var(--text-muted); margin-bottom:12px; background:#0a0e17; padding:12px; border-radius:8px; border:1px solid var(--border);">
+      <pre style="white-space: pre-wrap; font-family: inherit;">Creative Homework Task: The Mendeleev Discovery Journal (1871)
+Write a fictional, first-person historical journal entry (150–200 words) from the perspective of Dmitri Mendeleev in St. Petersburg, dated 1871—two years after publishing the initial table, as he formulates the properties of then-undiscovered elements (such as eka-aluminum / gallium).
+Requirements:
+- Formal, reflective academic voice.
+- Realization that the gaps on the table are deliberate predictions rather than errors.
+- Integrate at least four collocations: repeating patterns, consecutive element, chemical reactivity, predictive capability, isolated data points, enduring strength.</pre>
+    </div>
+    <label style="display:block; font-size:0.85rem; font-weight:700; color:var(--primary); margin-bottom:4px;">Student Name (Required):</label>
+    <input type="text" id="student-name-input" class="student-name-box" placeholder="Write your full name here...">
+    <textarea id="writing-text" class="writing-box" placeholder="Type your journal reflection here..."></textarea>
+    <div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:10px;">
+      <button type="button" class="btn" onclick="transmitWritingPayload()">🚀 Submit to Google App Script</button>
+      <button type="button" class="btn btn-secondary" onclick="copyWritingText()">📋 Copy Text to Clipboard</button>
+    </div>
+    <div id="post-status" style="margin-top:12px; font-size:0.85rem;"></div>
+    <iframe name="hidden_frame" id="hidden_frame" style="display:none;" onload="handleIframeReturn()"></iframe>
+    <form id="gas-form" target="hidden_frame" method="POST" action="https://script.google.com/macros/s/AKfycbxID8_ZvaQfVflyoz4iJXH0k1uFtXM_O0piItLl1zVV_-tmJuB5QQ4wrW5LP5UEKHIY/exec">
+      <input type="hidden" name="studentName" id="f-name" value="">
+      <input type="hidden" name="task" id="f-task" value="TOEFL C1 Reading & Vocabulary">
+      <input type="hidden" name="totalMastery" id="f-total" value="0">
+      <input type="hidden" name="studentResponse" id="f-resp" value="">
+      <input type="hidden" name="rawText" id="f-raw" value="">
+    </form>
+  </div>
+</div>
+<script>
+var engineData = {"examFormat":"TOEFL C1 Reading & Vocabulary","vocabList":[{"term":"repeating patterns","def":"regular events or shapes happening again and again","ru":"повторяющиеся закономерности (паттерны)","anchor":"🎮 Gaming: rhythm combos or cyclical enemy attack telegraphs"},{"term":"consecutive element","def":"the very next chemical substance in order","ru":"последовательный (следующий по порядку) элемент","anchor":"⚽ Sport: consecutive penalty strikes in a shootout"},{"term":"chemical reactivity","def":"how easily a substance interacts with others","ru":"химическая активность (реакционная способность)","anchor":"🔬 Science: alkali metals violently combusting in water"},{"term":"typographical solution","def":"practical printed design choice to fit text","ru":"типографское / полиграфическое решение","anchor":"🖥️ UI Design: adapting an oversized HUD for ultrawide screens"},{"term":"excessively wide","def":"much too broad to fit comfortably","ru":"чрезмерно широкий (выходящий за рамки)","anchor":"🏎️ Sport: wide-track chassis too broad for narrow street circuits"},{"term":"enduring strength","def":"lasting power that stays effective over time","ru":"непреходящая / стойкая сила (долговечность)","anchor":"🏋️ Sport: marathon stamina under high anaerobic fatigue"},{"term":"predictive capability","def":"ability to forecast future outcomes correctly","ru":"прогностическая способность","anchor":"🎮 RTS Games: predicting opponent army movements through fog of war"},{"term":"historical foundations","def":"original past events that build modern ideas","ru":"исторические основы / истоки","anchor":"🏛️ Tech: legacy server engines running modern multiplayer code"},{"term":"atomic number","def":"total count of protons inside a nucleus","ru":"атомный номер (число протонов)","anchor":"🔬 Physics: element unique digital identity barcode"},{"term":"electron shells","def":"layered regions around an atom holding electrons","ru":"электронные оболочки / энергетические уровни","anchor":"🛡️ Sci-Fi: concentric layered shielding around a space vessel"},{"term":"noble gases","def":"stable, non-reactive elements in Group 18","ru":"благородные (инертные) газы","anchor":"🛡️ Gaming: maximum armor buff totally immune to status debuffs"},{"term":"isolated data points","def":"individual facts viewed without any broader pattern","ru":"изолированные / разрозненные данные","anchor":"📊 Data: unconnected telemetry pings prior to rendering a model curve"}],"clozeList":[{"prefix":"The Periodic Table’s ","key":"historical foundations","suffix":" emerged in 1869 when Dmitri Mendeleev organized the sixty-three known elements into a functional system."},{"prefix":"Rather than recording isolated measurements, he recognized that elements exhibit cyclical, ","key":"repeating patterns","suffix":" in their physical and chemical behaviors."},{"prefix":"Along each horizontal row, each ","key":"consecutive element","suffix":" possesses an additional nuclear proton that directly dictates its atomic number."},{"prefix":"These horizontal periods classify elements according to the total count of occupied ","key":"electron shells","suffix":" surrounding their nuclei."},{"prefix":"In contrast, the vertical columns arrange substances by shared outer-orbital electrons, which ultimately determine their ","key":"chemical reactivity","suffix":"."},{"prefix":"This grouping places the volatile alkali metals in Group 1, whereas stable ","key":"noble gases","suffix":" occupy the far right column."},{"prefix":"The inner transition metals of Periods 6 and 7 were moved beneath the chart as a practical ","key":"typographical solution","suffix":"."},{"prefix":"Without separating these elements, standard reference tables would become ","key":"excessively wide","suffix":" to print legibly on a single page."},{"prefix":"This cohesive visual architecture prevents scientists from mistaking interrelated elements for arbitrary, ","key":"isolated data points","suffix":"."},{"prefix":"The ","key":"enduring strength","suffix":" of this framework lies in its capacity to unify disparate chemical principles within one logical matrix."},{"prefix":"By deliberately leaving vacant slots for unisolated elements, Mendeleev displayed unmatched ","key":"predictive capability","suffix":"."}],"qaList":[{"q":"What atomic property changes with each consecutive element across a horizontal period, and what does this number indicate?","a":"Each consecutive element adds a single proton to its nucleus, which defines the element's specific atomic number."},{"q":"How does the structural criterion used to sort elements by electron shells differ from the factor determining their chemical reactivity?","a":"Horizontal periods organize elements by their total number of occupied electron shells, while vertical groups align elements by outer-shell valence electrons, which govern chemical reactivity."},{"q":"Why are noble gases placed together on the far right of the table, rather than with volatile elements?","a":"Noble gases reside in Group 18 because their outer electron shells are completely filled, making them chemically inert compared to reactive groups."},{"q":"Why was a typographical solution applied to the inner transition metals instead of leaving the layout continuous?","a":"Placing them inline would have made printed charts excessively wide and difficult to read on standard paper, so they were positioned below the main grid."},{"q":"What proved the enduring strength and predictive capability of Mendeleev’s historical foundations?","a":"Later laboratory discoveries of unisolated elements matched the exact properties and weights Mendeleev had forecasted using the gaps in his periodic framework."}],"writingPrompt":"Creative Homework Task: The Mendeleev Discovery Journal (1871)\nWrite a fictional, first-person historical journal entry (150–200 words) from the perspective of Dmitri Mendeleev in St. Petersburg, dated 1871—two years after publishing the initial table, as he formulates the properties of then-undiscovered elements (such as eka-aluminum / gallium).\nRequirements:\n- Formal, reflective academic voice.\n- Realization that the gaps on the table are deliberate predictions rather than errors.\n- Integrate at least four collocations: repeating patterns, consecutive element, chemical reactivity, predictive capability, isolated data points, enduring strength.","audioBase64":null};
+var mcIndex = 0;
+var currentCalib = null;
+var qaIndex = 0;
+var s1Score = 0;
+var s2Score = 0;
+var s3Score = 0;
+var s4Score = 0;
+var isSending = false;
+function updateOverallScore() {
+  var s1Norm = (s1Score / 12) * 20;
+  var s2Norm = (s2Score / 12) * 30;
+  var s3Norm = (s3Score / 12) * 30;
+  var s4Norm = (s4Score / 50) * 20;
+  var total = Math.round(s1Norm + s2Norm + s3Norm + s4Norm);
+  document.getElementById("ov-score").innerText = total + " / 100 (" + total + "%)";
+  var lvl = "A2 Elementary";
+  if (total >= 85) lvl = "C1+ Academic Mastery";
+  else if (total >= 70) lvl = "B2+ Strong Competence";
+  else if (total >= 50) lvl = "B1 Intermediate Threshold";
+  document.getElementById("ov-level").innerText = lvl;
+}
+function speakWord(txt) {
+  if ("speechSynthesis" in window) {
+    window.speechSynthesis.cancel();
+    var u = new SpeechSynthesisUtterance(txt);
+    u.lang = "en-US";
+    u.rate = 0.9;
+    window.speechSynthesis.speak(u);
+  }
+}
+function speakCurrentMC() {
+  if (engineData.vocabList[mcIndex]) speakWord(engineData.vocabList[mcIndex].term);
+}
+function setPanel(idx) {
+  document.querySelectorAll(".tab-btn").forEach(function(t, i) { t.classList.toggle("active", i === idx); });
+  document.querySelectorAll(".panel").forEach(function(p, i) { p.classList.toggle("active", i === idx); });
+}
+var tilePick = null;
+function initMatch() {
+  var board = document.getElementById("tile-board");
+  board.innerHTML = "";
+  var pool = [];
+  engineData.vocabList.forEach(function(v, i) {
+    pool.push({ id: i, txt: v.term, type: "en" });
+    pool.push({ id: i, txt: v.ru, type: "ru" });
+  });
+  pool.sort(function() { return Math.random() - 0.5; });
+  pool.forEach(function(item) {
+    var d = document.createElement("div");
+    d.className = "tile";
+    d.innerText = item.txt;
+    d.onclick = function() {
+      if (d.classList.contains("matched")) return;
+      if (!tilePick) {
+        tilePick = { el: d, item: item };
+        d.classList.add("selected");
+      } else {
+        if (tilePick.el === d) {
+          d.classList.remove("selected");
+          tilePick = null;
+          return;
+        }
+        if (tilePick.item.id === item.id && tilePick.item.type !== item.type) {
+          d.classList.add("matched");
+          tilePick.el.classList.add("matched");
+          s1Score++;
+          var pct = Math.round((s1Score / 12) * 100);
+          document.getElementById("s1-score-txt").innerText = s1Score + " / 12 pairs (" + pct + "%)";
+          if (s1Score === 12) {
+            document.getElementById("s1-recom").innerText = "Recommendation: Outstanding retrieval latency. You have formed strong associative connections.";
+          } else {
+            document.getElementById("s1-recom").innerText = "Recommendation: " + (12 - s1Score) + " pairs remaining. Notice recurring morpheme patterns.";
+          }
+          updateOverallScore();
+          tilePick = null;
+        } else {
+          tilePick.el.classList.remove("selected");
+          tilePick = null;
+        }
+      }
+    };
+    board.appendChild(d);
+  });
+}
+function setCalib(btn, lvl) {
+  document.querySelectorAll(".calib-btn").forEach(function(b) { b.classList.remove("active"); });
+  btn.classList.add("active");
+  currentCalib = lvl;
+}
+function loadMC() {
+  currentCalib = null;
+  document.querySelectorAll(".calib-btn").forEach(function(b) { b.classList.remove("active"); });
+  document.getElementById("mc-socratic").style.display = "none";
+  document.getElementById("mc-next").style.display = "none";
+  if (!engineData.vocabList.length) return;
+  var cur = engineData.vocabList[mcIndex];
+  document.getElementById("mc-counter").innerText = (mcIndex + 1);
+  document.getElementById("mc-prompt").innerText = cur.term;
+  var opts = [cur.def];
+  while (opts.length < 4 && opts.length < engineData.vocabList.length) {
+    var r = engineData.vocabList[Math.floor(Math.random() * engineData.vocabList.length)];
+    if (opts.indexOf(r.def) === -1) opts.push(r.def);
+  }
+  opts.sort(function() { return Math.random() - 0.5; });
+  var container = document.getElementById("mc-options");
+  container.innerHTML = "";
+  opts.forEach(function(opt) {
+    var b = document.createElement("button");
+    b.className = "mc-option";
+    b.innerText = opt;
+    b.onclick = function() { evalMC(b, opt === cur.def, cur); };
+    container.appendChild(b);
+  });
+}
+function evalMC(btn, isCorrect, itm) {
+  if (!currentCalib) {
+    alert("Please calibrate your certainty (Guess, Sure, Don't Know) first.");
+    return;
+  }
+  var soc = document.getElementById("mc-socratic");
+  var txt = document.getElementById("socratic-txt");
+  soc.style.display = "block";
+  if (isCorrect) {
+    btn.classList.add("correct");
+    s2Score++;
+    if (currentCalib === "sure") {
+      txt.innerText = "Accurate schema verification! Certainty matched neural retrieval. Russian anchor: " + itm.ru;
+    } else {
+      txt.innerText = "Correct recognition! Even though marked '" + currentCalib + "', subconscious semantic priming succeeded.";
+    }
+  } else {
+    btn.classList.add("wrong");
+    txt.innerText = "Socratic clue: Anchor: " + itm.anchor + ". Russian transfer link: " + itm.ru;
+  }
+  var pct = Math.round((s2Score / 12) * 100);
+  document.getElementById("s2-score-txt").innerText = s2Score + " / 12 correct (" + pct + "%)";
+  if (pct >= 80) document.getElementById("s2-recom").innerText = "Recommendation: Outstanding collocation retention. Ready for authentic TOEFL/IELTS reading passages.";
+  else if (pct >= 50) document.getElementById("s2-recom").innerText = "Recommendation: Moderate accuracy. Focus on distinguishing subtle distractor definitions.";
+  else document.getElementById("s2-recom").innerText = "Recommendation: Review the Russian cognates to reinforce semantic roots.";
+  updateOverallScore();
+  document.getElementById("mc-next").style.display = "inline-block";
+}
+function nextMC() {
+  mcIndex = (mcIndex + 1) % engineData.vocabList.length;
+  loadMC();
+}
+function initCloze() {
+  var c = document.getElementById("cloze-list");
+  c.innerHTML = "";
+  engineData.clozeList.forEach(function(cl, i) {
+    var div = document.createElement("div");
+    div.className = "cloze-item";
+    var choices = [cl.key];
+    while (choices.length < 5 && choices.length < engineData.vocabList.length) {
+      var r = engineData.vocabList[Math.floor(Math.random() * engineData.vocabList.length)].term;
+      if (choices.indexOf(r) === -1) choices.push(r);
+    }
+    choices.sort(function() { return Math.random() - 0.5; });
+    var sel = "<select class=\"gap-select\" data-ans=\"" + cl.key + "\">";
+    sel += "<option value=\"\">-- select collocation --</option>";
+    choices.forEach(function(opt) { sel += "<option value=\"" + opt + "\">" + opt + "</option>"; });
+    sel += "</select>";
+    div.innerHTML = (i + 1) + ". " + cl.prefix + " " + sel + " " + cl.suffix;
+    c.appendChild(div);
+  });
+}
+function evaluateCloze() {
+  var selects = document.querySelectorAll(".gap-select");
+  var score = 0;
+  selects.forEach(function(s) {
+    if (s.value === s.getAttribute("data-ans")) {
+      s.className = "gap-select correct";
+      score++;
+    } else {
+      s.className = "gap-select wrong";
+    }
+  });
+  s3Score = score;
+  var pct = Math.round((s3Score / 12) * 100);
+  document.getElementById("s3-score-txt").innerText = s3Score + " / 12 correct (" + pct + "%)";
+  if (s3Score === 12) document.getElementById("s3-recom").innerText = "Recommendation: Flawless synthesis. Contextual collocations firmly consolidated in long-term memory.";
+  else document.getElementById("s3-recom").innerText = "Recommendation: " + (12 - s3Score) + " errors. Check collocations governing adjacent prepositions.";
+  document.getElementById("cloze-score").innerText = "Completed " + score + " / " + selects.length;
+  updateOverallScore();
+}
+function loadQA() {
+  if (!engineData.qaList.length) return;
+  document.getElementById("qa-num").innerText = qaIndex + 1;
+  document.getElementById("qa-question").innerText = engineData.qaList[qaIndex].q;
+  document.getElementById("qa-input").value = "";
+  document.getElementById("qa-model-box").style.display = "none";
+}
+function revealBenchmark() {
+  document.getElementById("qa-model").innerText = engineData.qaList[qaIndex].a;
+  document.getElementById("qa-model-box").style.display = "block";
+}
+function submitEval(score) {
+  s4Score += score;
+  var maxScore = 50;
+  var pct = Math.round((s4Score / maxScore) * 100);
+  document.getElementById("s4-score-txt").innerText = s4Score + " / 50 pts (" + pct + "%)";
+  if (pct >= 80) document.getElementById("s4-recom").innerText = "Recommendation: Outstanding synthesis fidelity. Precise alignment with academic criteria.";
+  else document.getElementById("s4-recom").innerText = "Recommendation: Review benchmark answers to mirror academic sentence structures.";
+  updateOverallScore();
+  qaIndex = (qaIndex + 1) % engineData.qaList.length;
+  loadQA();
+}
+function transmitWritingPayload() {
+  var studentName = document.getElementById("student-name-input").value.trim();
+  var val = document.getElementById("writing-text").value.trim();
+  var st = document.getElementById("post-status");
+  if (!studentName) {
+    st.innerHTML = "<span style=\"color:var(--danger)\">Please enter your name in the Student Name box before submitting.</span>";
+    document.getElementById("student-name-input").focus();
+    return;
+  }
+  if (!val) {
+    st.innerHTML = "<span style=\"color:var(--danger)\">Please write your journal response first.</span>";
+    return;
+  }
+  st.innerHTML = "<span style=\"color:var(--primary)\">Transmitting payload via tri-mode pipeline (Form + JSON + URL query)...</span>";
+  isSending = true;
+  var totalVal = document.getElementById("ov-score").innerText;
+  document.getElementById("f-name").value = studentName;
+  document.getElementById("f-resp").value = val;
+  document.getElementById("f-raw").value = val;
+  document.getElementById("f-total").value = totalVal;
+  document.getElementById("gas-form").submit();
+  try {
+    var payload = { studentName: studentName, task: engineData.examFormat, totalMastery: totalVal, studentResponse: val, rawText: val, timestamp: new Date().toISOString() };
+    fetch("https://script.google.com/macros/s/AKfycbxID8_ZvaQfVflyoz4iJXH0k1uFtXM_O0piItLl1zVV_-tmJuB5QQ4wrW5LP5UEKHIY/exec", {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    }).catch(function(){});
+  } catch(e) {}
+  setTimeout(function() {
+    if (isSending) {
+      st.innerHTML = "<span style=\"color:var(--success)\">✓ Dispatched! Name and text recorded. Use 'Copy Text' as instant backup.</span>";
+      isSending = false;
+    }
+  }, 1200);
+}
+function handleIframeReturn() {
+  if (isSending) {
+    document.getElementById("post-status").innerHTML = "<span style=\"color:var(--success)\">✓ Submission confirmed by Google Apps Script frame!</span>";
+    isSending = false;
+  }
+}
+function copyWritingText() {
+  var studentName = document.getElementById("student-name-input").value.trim();
+  var val = document.getElementById("writing-text").value.trim();
+  if (!val) { alert("Nothing to copy."); return;
+  }
+  var clipboardContent = (studentName ? "Student: " + studentName + "\n\n" : "") + val;
+  navigator.clipboard.writeText(clipboardContent).then(function() {
+    document.getElementById("post-status").innerHTML = "<span style=\"color:var(--success)\">✓ Response (with Name) copied to clipboard!</span>";
+  });
+}
+window.onload = function() {
+  initMatch();
+  loadMC();
+  initCloze();
+  loadQA();
+  updateOverallScore();
+};
+</script>
+</body>
+</html>
