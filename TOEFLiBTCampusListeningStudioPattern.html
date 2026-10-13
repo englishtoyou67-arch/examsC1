@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TOEFL iBT Listening Studio & Test Generator</title>
+  <style>
+    :root {
+      --bg-slate: #0b1120;
+      --card-bg: #1e293b;
+      --card-border: #334155;
+      --input-bg: #0f172a;
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --valid-green: #059669;
+      --valid-bg: rgba(5, 150, 105, 0.12);
+      --error-red: #dc2626;
+      
+      --color-opt-a: #2563eb;
+      --color-opt-b: #059669;
+      --color-opt-c: #d97706;
+      --color-opt-d: #7c3aed;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background-color: var(--bg-slate); color: var(--text); padding: 1.5rem 1rem; display: flex; justify-content: center; }
+    .container { width: 100%; max-width: 920px; display: flex; flex-direction: column; gap: 1.5rem; }
+
+    header { text-align: center; margin-bottom: 0.5rem; }
+    header h1 { font-size: 2rem; font-weight: 800; background: linear-gradient(135deg, #60a5fa, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    header p { color: var(--text-muted); font-size: 0.95rem; margin-top: 0.25rem; }
+
+    .tabs { display: flex; gap: 0.75rem; justify-content: center; margin-bottom: 0.5rem; }
+    .tab-btn { background: #1e293b; border: 1px solid var(--card-border); color: var(--text-muted); padding: 0.6rem 1.25rem; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+    .tab-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+    .card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; padding: 1.5rem; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3); }
+    .card h2 { font-size: 1.25rem; margin-bottom: 1rem; border-bottom: 1px solid var(--card-border); padding-bottom: 0.5rem; color: #e2e8f0; display: flex; align-items: center; justify-content: space-between; }
+    
+    .form-group { margin-bottom: 1.25rem; display: flex; flex-direction: column; gap: 0.4rem; }
+    .form-group:last-child { margin-bottom: 0; }
+    label { font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+    .hint { font-size: 0.75rem; color: #64748b; font-weight: normal; text-transform: none; }
+
+    input[type="text"], input[type="number"], textarea, select {
+      width: 100%; background: var(--input-bg); border: 1.5px solid var(--card-border); color: var(--text); padding: 0.7rem 0.9rem; border-radius: 8px; font-size: 0.95rem; outline: none; transition: all 0.2s;
+    }
+    textarea { resize: vertical; min-height: 80px; }
+
+    /* Green Highlight on Input Validation */
+    .field-filled { border-color: var(--valid-green) !important; background-color: var(--valid-bg) !important; }
+
+    .file-row { display: grid; grid-template-columns: 1fr auto; gap: 0.5rem; align-items: center; }
+    .file-btn { background: #334155; color: white; padding: 0.7rem 1.2rem; border-radius: 8px; cursor: pointer; font-size: 0.85rem; font-weight: 600; white-space: nowrap; }
+    .file-btn:hover { background: #475569; }
+    input[type="file"] { display: none; }
+
+    .opts-grid { display: grid; grid-template-columns: 1fr; gap: 0.75rem; }
+    @media(min-width: 640px) { .opts-grid { grid-template-columns: 1fr 1fr; } }
+    .opt-box { border-left: 4px solid transparent; padding-left: 0.5rem; }
+    .opt-box.a { border-color: var(--color-opt-a); }
+    .opt-box.b { border-color: var(--color-opt-b); }
+    .opt-box.c { border-color: var(--color-opt-c); }
+    .opt-box.d { border-color: var(--color-opt-d); }
+
+    .sticky-bar { position: sticky; bottom: 1rem; background: rgba(30,41,59,0.95); backdrop-filter: blur(8px); padding: 1rem; border-radius: 12px; border: 1px solid var(--card-border); display: flex; gap: 1rem; z-index: 20; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+    .btn { flex: 1; padding: 0.85rem 1.25rem; border-radius: 8px; border: none; font-size: 1rem; font-weight: 700; cursor: pointer; transition: all 0.2s; text-align: center; }
+    .btn-primary { background: var(--accent); color: white; }
+    .btn-primary:hover { background: var(--accent-hover); }
+    .btn-success { background: var(--valid-green); color: white; }
+    .btn-success:hover { background: #047857; }
+
+    /* TEST PREVIEW ENGINE */
+    .preview-card { background: #1e293b; border-radius: 16px; border: 1px solid var(--card-border); overflow: hidden; position: relative; }
+    .instructions-banner { background: #0f172a; border-bottom: 2px solid #334155; padding: 1.25rem; }
+    .instructions-banner h3 { font-size: 1.1rem; color: #60a5fa; margin-bottom: 0.4rem; display: flex; align-items: center; gap: 0.5rem; }
+    .instructions-banner p { font-size: 0.9rem; color: #cbd5e1; line-height: 1.5; }
+    
+    .media-container { width: 100%; background: #000; position: relative; }
+    .aspect-16-9 { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; display: block; }
+    .audio-dock { padding: 1rem; background: #0f172a; border-top: 1px solid var(--card-border); border-bottom: 1px solid var(--card-border); }
+    audio { width: 100%; height: 40px; }
+
+    .test-workspace { padding: 1.75rem; }
+    .phase-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; }
+    .phase-badge { background: #334155; padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.8rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; }
+    .timer-pill { font-size: 1.15rem; font-weight: 800; color: #fbbf24; font-variant-numeric: tabular-nums; display: flex; align-items: center; gap: 0.35rem; }
+    
+    .question-prompt { font-size: 1.3rem; font-weight: 700; line-height: 1.4; margin-bottom: 1.5rem; }
+    .choice-grid { display: grid; grid-template-columns: 1fr; gap: 0.85rem; margin-bottom: 1.5rem; }
+    
+    .choice-btn {
+      background: #0f172a; border: 2px solid transparent; color: var(--text); padding: 1rem; border-radius: 10px; font-size: 0.95rem; font-weight: 500; text-align: left; cursor: pointer; display: flex; align-items: flex-start; gap: 0.75rem; transition: all 0.2s;
+    }
+    .choice-btn .badge { width: 26px; height: 26px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.8rem; flex-shrink: 0; color: white; }
+    .choice-btn.a .badge { background: var(--color-opt-a); }
+    .choice-btn.b .badge { background: var(--color-opt-b); }
+    .choice-btn.c .badge { background: var(--color-opt-c); }
+    .choice-btn.d .badge { background: var(--color-opt-d); }
+    .choice-btn.a { border-color: rgba(37,99,235,0.4); }
+    .choice-btn.b { border-color: rgba(5,150,105,0.4); }
+    .choice-btn.c { border-color: rgba(217,119,6,0.4); }
+    .choice-btn.d { border-color: rgba(124,58,237,0.4); }
+    .choice-btn:hover:not(:disabled) { transform: translateY(-2px); filter: brightness(1.2); }
+    
+    .choice-btn.btn-correct { background: #065f46 !important; border-color: #10b981 !important; color: white !important; }
+    .choice-btn.btn-wrong { background: #991b1b !important; border-color: #ef4444 !important; color: white !important; }
+
+    .explanation-panel { background: #0f172a; border-left: 4px solid var(--accent); padding: 1.25rem; border-radius: 8px; margin-bottom: 1.5rem; display: none; }
+    .explanation-panel h4 { font-size: 0.95rem; color: #60a5fa; margin-bottom: 0.4rem; }
+    .explanation-panel p { font-size: 0.9rem; color: #cbd5e1; line-height: 1.5; }
+
+    .advance-btn { width: 100%; padding: 0.9rem; background: var(--accent); color: white; font-weight: 700; border-radius: 8px; border: none; font-size: 1rem; cursor: pointer; display: none; }
+    .advance-btn:hover { background: var(--accent-hover); }
+
+    /* Results Screen */
+    .results-screen { padding: 3rem 1.5rem; text-align: center; display: none; }
+    .score-circle { font-size: 4rem; font-weight: 900; margin: 1rem 0; }
+    .eval-box { background: #0f172a; border: 1px solid var(--card-border); padding: 1.5rem; border-radius: 12px; max-width: 600px; margin: 1.5rem auto; line-height: 1.6; color: #cbd5e1; }
+    
+    @keyframes cardShake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-10px); }
+      40%, 80% { transform: translateX(10px); }
+    }
+    .shake-fail { animation: cardShake 0.4s ease-in-out 2; }
+    #confettiCanvas { position: absolute; inset: 0; pointer-events: none; z-index: 50; }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <h1>TOEFL iBT Campus Listening Studio</h1>
+      <p>Configure parameters in the Builder or test live in the Student Practice runner.</p>
+    </header>
+
+    <div class="tabs">
+      <button class="tab-btn active" id="tabBuilder" onclick="switchView('builder')">Builder & Editor Mode</button>
+      <button class="tab-btn" id="tabRunner" onclick="switchView('runner')">Test Engine Preview</button>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- VIEW 1: BUILDER STUDIO (EDIT MODE)         -->
+    <!-- ========================================== -->
+    <div id="builderView" style="display: flex; flex-direction: column; gap: 1.5rem;">
+      <section class="card">
+        <h2>1. Global Test Parameters</h2>
+        <div class="form-group">
+          <label>Test Title</label>
+          <input type="text" id="cfgTitle" value="TOEFL iBT Listening: Campus Office Hours (Club Leadership)" oninput="syncValidation()">
+        </div>
+
+        <div class="form-group">
+          <label>Stimulus Image <span class="hint">(Recommended: 16:9 ratio, 1280×720px PNG/JPG/WebP)</span></label>
+          <div class="file-row">
+            <input type="text" id="cfgImage" value="https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=1280&auto=format&fit=crop&q=80" oninput="syncValidation()">
+            <label class="file-btn">
+              Browse Local File
+              <input type="file" id="fileImage" accept=".png, .jpg, .jpeg, .webp">
+            </label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Stimulus Audio <span class="hint">(Upload .mp3 / .wav or provide direct URL)</span></label>
+          <div class="file-row">
+            <input type="text" id="cfgAudio" value="https://interactive-examples.mdn.mozilla.net/media/cc0-audio/t-rex-roar.mp3" oninput="syncValidation()">
+            <label class="file-btn">
+              Browse Audio File
+              <input type="file" id="fileAudio" accept=".mp3, .wav">
+            </label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Timer Per Question (Seconds)</label>
+          <input type="number" id="cfgTimer" value="45" min="10" max="180" oninput="syncValidation()">
+        </div>
+      </section>
+
+      <!-- 5 Question Cards Container -->
+      <div id="builderQuestionsList" style="display: flex; flex-direction: column; gap: 1.5rem;"></div>
+
+      <div class="sticky-bar">
+        <button class="btn btn-primary" onclick="generateAndDownload()">Export Standalone Test HTML</button>
+        <button class="btn btn-success" onclick="previewInRunner()">Launch Test Preview</button>
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- VIEW 2: TEST RUNNER (STUDENT EXPERIENCE)   -->
+    <!-- ========================================== -->
+    <div id="runnerView" style="display: none;">
+      <div class="preview-card" id="runnerCard">
+        <canvas id="confettiCanvas"></canvas>
+
+        <!-- TOEFL Exam Note-taking Instructions -->
+        <div class="instructions-banner">
+          <h3>📝 TOEFL iBT Listening Section Instructions</h3>
+          <p>Listen carefully to the conversation and <strong>take notes</strong>. In the real exam, you will hear the recording <strong>only once</strong>. After the conversation ends, click <strong>"Begin Questions"</strong> to answer the 5 questions using your written notes. You will have <strong>45 seconds</strong> per question.</p>
+        </div>
+
+        <!-- Stimulus Media Dock -->
+        <div class="media-container">
+          <img id="runnerImg" class="aspect-16-9" alt="Stimulus Scene">
+          <div class="audio-dock">
+            <audio id="runnerAudio" controls></audio>
+          </div>
+        </div>
+
+        <!-- Phase 1: Listening Prompt -->
+        <div id="phase1Area" class="test-workspace" style="text-align: center; padding: 2.5rem 1.5rem;">
+          <h3 style="font-size: 1.35rem; margin-bottom: 0.75rem;">Phase 1: Active Listening &amp; Note-Taking</h3>
+          <p style="color: var(--text-muted); max-width: 580px; margin: 0 auto 1.5rem; line-height: 1.5;">
+            Play the track above and record your notes. When the track finishes or you are ready to begin answering, unlock the timed questions below.
+          </p>
+          <button class="btn btn-primary" style="max-width: 280px; margin: 0 auto;" onclick="startPhase2()">Begin Questions →</button>
+        </div>
+
+        <!-- Phase 2: Timed Questions -->
+        <div id="phase2Area" class="test-workspace" style="display: none;">
+          <div class="phase-bar">
+            <span class="phase-badge" id="runnerProgress">Question 1 of 5</span>
+            <div class="timer-pill" id="runnerTimerBox">⏱ <span id="runnerTime">45</span>s</div>
+          </div>
+
+          <div class="question-prompt" id="runnerPrompt"></div>
+          <div class="choice-grid" id="runnerChoiceGrid"></div>
+
+          <div class="explanation-panel" id="runnerExpPanel">
+            <h4 id="runnerExpTitle">Explanation &amp; Distractor Analysis</h4>
+            <p id="runnerExpBody"></p>
+          </div>
+
+          <button class="advance-btn" id="runnerNextBtn" onclick="nextQuestion()">Next Question →</button>
+        </div>
+
+        <!-- End Screen Diagnostic -->
+        <div class="results-screen" id="runnerEndScreen">
+          <h2 style="font-size: 1.8rem; margin-bottom: 0.5rem;" id="endTitle">Test Complete</h2>
+          <div class="score-circle" id="endScoreDisplay">5 / 5</div>
+          <div class="eval-box" id="endDiagnostic"></div>
+          <button class="btn btn-primary" style="display: inline-block; width: auto; padding: 0.8rem 2.5rem; margin-top: 1rem;" onclick="resetRunner()">Retake Test</button>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // PRE-POPULATED DATA: Sophie & Ms. Vance Campus Conversation
+    const defaultData = {
+      title: "TOEFL iBT Listening: Campus Office Hours (Club Leadership)",
+      image: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=1280&auto=format&fit=crop&q=80",
+      audio: "https://interactive-examples.mdn.mozilla.net/media/cc0-audio/t-rex-roar.mp3",
+      timer: 45,
+      questions: [
+        {
+          prompt: "Why does the student go to see the advisor?",
+          opts: [
+            "To submit her application for the European exchange program.",
+            "To express concerns about the selection process for a club leadership role.",
+            "To request a letter of recommendation for the faculty advisory board.",
+            "To complain about the current president's management of the language club."
+          ],
+          ans: 1,
+          exp: "At the beginning of the conversation, Sophie states: \"I’m a bit worried about the selection process. I heard rumors that club leadership roles are usually decided informally...\" She came to address her concerns regarding how candidates are chosen.\n\n• Distractor Analysis: Option A is incorrect because she is applying for a club position, not an exchange program. Option C is incorrect because she does not ask for a recommendation letter. Option D is incorrect because she is seeking guidance on her application, not filing an official complaint."
+        },
+        {
+          prompt: "According to the advisor, who makes the final decision regarding the Lead Coordinator position?",
+          opts: [
+            "The current student club president.",
+            "A vote by all active club members.",
+            "The faculty advisory board.",
+            "The Student Engagement Office staff."
+          ],
+          ans: 2,
+          exp: "Ms. Vance explicitly clarifies: \"It’s true that student officers give input, but the final selection actually rests with our faculty advisory board.\"\n\n• Distractor Analysis: Option A is incorrect because the student president only provides input. Options B and D are never mentioned in the audio dialogue."
+        },
+        {
+          prompt: "What does the advisor imply when she tells the student, \"She'll see through you as if you were glass\"?",
+          opts: [
+            "The club president easily detects inauthentic behavior.",
+            "The club president prefers transparent financial reports.",
+            "The interview room has glass walls for public observation.",
+            "The student needs to speak more clearly during her presentation."
+          ],
+          ans: 0,
+          exp: "The idiom \"see through someone as if they were glass\" denotes the ability to immediately recognize pretense or deceit. Ms. Vance uses it to caution Sophie against adopting a fake persona just to impress the president.\n\n• Distractor Analysis: Options B, C, and D misinterpret the figurative idiom as a literal statement regarding transparency, architecture, or speech acoustics."
+        },
+        {
+          prompt: "What specific advice does the advisor give regarding the upcoming interview?",
+          opts: [
+            "To focus on past achievements rather than future plans.",
+            "To arrive early and present concrete project proposals.",
+            "To negotiate position responsibilities with the club president.",
+            "To shorten the presentation to leave time for questions."
+          ],
+          ans: 1,
+          exp: "Ms. Vance advises Sophie that successful applicants present concrete, innovative ideas (such as her peer-tutoring project) and explicitly adds: \"make sure you show up early. Don't try to arrive fashionably late thinking it makes you look important!\"\n\n• Distractor Analysis: Option A contradicts the advisor's advice to focus on forward-looking initiatives. Options C and D are never suggested by the advisor."
+        },
+        {
+          prompt: "What can be inferred about the student's motivation for applying for the position?",
+          opts: [
+            "She wants to impress her professors to improve her academic standing.",
+            "She is primarily interested in building her resume for college applications.",
+            "She is genuinely passionate about language learning and cultural exchange.",
+            "She wants to reform the club's administrative guidelines."
+          ],
+          ans: 2,
+          exp: "Sophie directly states that she wants the position \"because of my passion for foreign language learning, not just to add a title to my resume\" and describes the club as \"a love match\" aligned with her passion for cross-cultural communication.\n\n• Distractor Analysis: Options A and D are unmentioned. Option B is explicitly contradicted by the student's own words."
+        }
+      ]
+    };
+
+    // Render Question Cards in Builder Studio
+    const qListEl = document.getElementById('builderQuestionsList');
+    defaultData.questions.forEach((q, idx) => {
+      const qNum = idx + 1;
+      const card = document.createElement('section');
+      card.className = 'card';
+      card.innerHTML = `
+        <h2>Question Card ${qNum}</h2>
+        <div class="form-group">
+          <label>Question Prompt</label>
+          <textarea id="q${qNum}_prompt" oninput="syncValidation()">${q.prompt}</textarea>
+        </div>
+
+        <div class="opts-grid">
+          <div class="form-group opt-box a">
+            <label>Option A (Blue)</label>
+            <input type="text" id="q${qNum}_opt0" value="${q.opts[0]}" oninput="syncValidation()">
+          </div>
+          <div class="form-group opt-box b">
+            <label>Option B (Green)</label>
+            <input type="text" id="q${qNum}_opt1" value="${q.opts[1]}" oninput="syncValidation()">
+          </div>
+          <div class="form-group opt-box c">
+            <label>Option C (Yellow)</label>
+            <input type="text" id="q${qNum}_opt2" value="${q.opts[2]}" oninput="syncValidation()">
+          </div>
+          <div class="form-group opt-box d">
+            <label>Option D (Purple)</label>
+            <input type="text" id="q${qNum}_opt3" value="${q.opts[3]}" oninput="syncValidation()">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Correct Answer Key</label>
+          <select id="q${qNum}_ans" oninput="syncValidation()">
+            <option value="0" ${q.ans === 0 ? 'selected' : ''}>Option A (Blue)</option>
+            <option value="1" ${q.ans === 1 ? 'selected' : ''}>Option B (Green)</option>
+            <option value="2" ${q.ans === 2 ? 'selected' : ''}>Option C (Yellow)</option>
+            <option value="3" ${q.ans === 3 ? 'selected' : ''}>Option D (Purple)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Detailed Explanation & Distractor Analysis</label>
+          <textarea id="q${qNum}_exp" oninput="syncValidation()">${q.exp}</textarea>
+        </div>
+      `;
+      qListEl.appendChild(card);
+    });
+
+    // Color Inputs Green When Populated
+    function syncValidation() {
+      const inputs = document.querySelectorAll('input[type="text"], input[type="number"], textarea, select');
+      inputs.forEach(el => {
+        if (el.value.trim().length > 0) {
+          el.classList.add('field-filled');
+        } else {
+          el.classList.remove('field-filled');
+        }
+      });
+    }
+    syncValidation();
+
+    // Data URL Conversions for local files
+    function bindFileReader(fileId, targetId) {
+      document.getElementById(fileId).addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = ev => {
+          const tgt = document.getElementById(targetId);
+          tgt.value = ev.target.result;
+          syncValidation();
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+    bindFileReader('fileImage', 'cfgImage');
+    bindFileReader('fileAudio', 'cfgAudio');
+
+    // Scrape Builder Data
+    function extractFormData() {
+      const data = {
+        title: document.getElementById('cfgTitle').value.trim() || "TOEFL iBT Test",
+        image: document.getElementById('cfgImage').value.trim(),
+        audio: document.getElementById('cfgAudio').value.trim(),
+        timer: parseInt(document.getElementById('cfgTimer').value, 10) || 45,
+        questions: []
+      };
+      for (let i = 1; i <= 5; i++) {
+        data.questions.push({
+          prompt: document.getElementById(`q${i}_prompt`).value.trim(),
+          opts: [
+            document.getElementById(`q${i}_opt0`).value.trim(),
+            document.getElementById(`q${i}_opt1`).value.trim(),
+            document.getElementById(`q${i}_opt2`).value.trim(),
+            document.getElementById(`q${i}_opt3`).value.trim()
+          ],
+          ans: parseInt(document.getElementById(`q${i}_ans`).value, 10),
+          exp: document.getElementById(`q${i}_exp`).value.trim()
+        });
+      }
+      return data;
+    }
+
+    // Tab Navigation
+    function switchView(mode) {
+      if (mode === 'builder') {
+        document.getElementById('builderView').style.display = 'flex';
+        document.getElementById('runnerView').style.display = 'none';
+        document.getElementById('tabBuilder').classList.add('active');
+        document.getElementById('tabRunner').classList.remove('active');
+      } else {
+        document.getElementById('builderView').style.display = 'none';
+        document.getElementById('runnerView').style.display = 'block';
+        document.getElementById('tabBuilder').classList.remove('active');
+        document.getElementById('tabRunner').classList.add('active');
+        initRunner(extractFormData());
+      }
+    }
+
+    function previewInRunner() {
+      switchView('runner');
+    }
+
+    // ==========================================
+    // AUDIO SYNTHESIZER (PURE WEB AUDIO API)
+    // ==========================================
+    class SoundFX {
+      constructor() { this.ctx = null; }
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          this.ctx = new AudioContext();
+        }
+        if (this.ctx.state === 'suspended') this.ctx.resume();
+      }
+      playChime() {
+        this.init();
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.connect(gain); gain.connect(this.ctx.destination);
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(523.25, now);
+        osc.frequency.setValueAtTime(659.25, now + 0.08);
+        osc.frequency.setValueAtTime(783.99, now + 0.16);
+        osc.frequency.setValueAtTime(1046.50, now + 0.24);
+        gain.gain.setValueAtTime(0.25, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.55);
+        osc.start(now); osc.stop(now + 0.55);
+      }
+      playBuzzer() {
+        this.init();
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.connect(gain); gain.connect(this.ctx.destination);
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(160, now);
+        osc.frequency.linearRampToValueAtTime(110, now + 0.35);
+        gain.gain.setValueAtTime(0.25, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+        osc.start(now); osc.stop(now + 0.4);
+      }
+      playFanfare() {
+        this.init();
+        [261.63, 329.63, 392.00, 523.25].forEach((freq, idx) => {
+          const t = this.ctx.currentTime + (idx * 0.12);
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.connect(gain); gain.connect(this.ctx.destination);
+          osc.type = 'square';
+          osc.frequency.value = freq;
+          gain.gain.setValueAtTime(0.15, t);
+          gain.gain.exponentialRampToValueAtTime(0.001, t + (idx === 3 ? 0.75 : 0.22));
+          osc.start(t); osc.stop(t + (idx === 3 ? 0.75 : 0.22));
+        });
+      }
+      playSad() {
+        this.init();
+        [196, 185, 174, 164].forEach((freq, idx) => {
+          const t = this.ctx.currentTime + (idx * 0.28);
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.connect(gain); gain.connect(this.ctx.destination);
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(freq, t);
+          osc.frequency.linearRampToValueAtTime(freq - 4, t + 0.26);
+          gain.gain.setValueAtTime(0.2, t);
+          gain.gain.exponentialRampToValueAtTime(0.001, t + 0.27);
+          osc.start(t); osc.stop(t + 0.28);
+        });
+      }
+    }
+    const fx = new SoundFX();
+
+    // ==========================================
+    // TEST RUNNER ENGINE STATE
+    // ==========================================
+    let currentTestData = null;
+    let currentQIdx = 0;
+    let score = 0;
+    let timerInterval = null;
+    let timeRemaining = 45;
+    let isQuestionActive = false;
+
+    function initRunner(data) {
+      currentTestData = data;
+      currentQIdx = 0;
+      score = 0;
+      clearInterval(timerInterval);
+
+      // Setup Media Dock
+      const img = document.getElementById('runnerImg');
+      const audio = document.getElementById('runnerAudio');
+      if (data.image) { img.src = data.image; img.style.display = 'block'; } else { img.style.display = 'none'; }
+      if (data.audio) { audio.src = data.audio; audio.style.display = 'block'; } else { audio.style.display = 'none'; }
+      audio.controls = true;
+
+      // Phase 1 Reset
+      document.getElementById('phase1Area').style.display = 'block';
+      document.getElementById('phase2Area').style.display = 'none';
+      document.getElementById('runnerEndScreen').style.display = 'none';
+    }
+
+    function resetRunner() {
+      initRunner(currentTestData || extractFormData());
+    }
+
+    function startPhase2() {
+      const audio = document.getElementById('runnerAudio');
+      audio.pause();
+      audio.controls = false; // Authentic TOEFL rule: audio replay locked during questions
+
+      document.getElementById('phase1Area').style.display = 'none';
+      document.getElementById('phase2Area').style.display = 'block';
+      currentQIdx = 0;
+      score = 0;
+      loadQuestion(0);
+    }
+
+    function loadQuestion(idx) {
+      clearInterval(timerInterval);
+      const q = currentTestData.questions[idx];
+      isQuestionActive = true;
+
+      document.getElementById('runnerProgress').textContent = `Question ${idx + 1} of 5`;
+      document.getElementById('runnerPrompt').textContent = q.prompt;
+      
+      const grid = document.getElementById('runnerChoiceGrid');
+      grid.innerHTML = '';
+      document.getElementById('runnerExpPanel').style.display = 'none';
+      document.getElementById('runnerNextBtn').style.display = 'none';
+
+      const letters = ['A', 'B', 'C', 'D'];
+      const styles = ['a', 'b', 'c', 'd'];
+
+      q.opts.forEach((optText, optIdx) => {
+        const btn = document.createElement('button');
+        btn.className = `choice-btn ${styles[optIdx]}`;
+        btn.innerHTML = `<span class="badge">${letters[optIdx]}</span><span>${optText}</span>`;
+        btn.addEventListener('click', () => chooseOption(optIdx));
+        grid.appendChild(btn);
+      });
+
+      // Launch 45s Timer
+      timeRemaining = currentTestData.timer || 45;
+      const timeDisplay = document.getElementById('runnerTime');
+      timeDisplay.textContent = timeRemaining;
+
+      timerInterval = setInterval(() => {
+        timeRemaining--;
+        timeDisplay.textContent = timeRemaining;
+        if (timeRemaining <= 0) {
+          clearInterval(timerInterval);
+          handleTimeout();
+        }
+      }, 1000);
+    }
+
+    function chooseOption(selectedIdx) {
+      if (!isQuestionActive) return;
+      isQuestionActive = false;
+      clearInterval(timerInterval);
+
+      const q = currentTestData.questions[currentQIdx];
+      const buttons = document.querySelectorAll('#runnerChoiceGrid .choice-btn');
+      buttons.forEach(b => b.disabled = true);
+
+      const expPanel = document.getElementById('runnerExpPanel');
+      const expTitle = document.getElementById('runnerExpTitle');
+      const expBody = document.getElementById('runnerExpBody');
+
+      if (selectedIdx === q.ans) {
+        buttons[selectedIdx].classList.add('btn-correct');
+        fx.playChime();
+        score++;
+        expPanel.style.borderLeftColor = 'var(--valid-green)';
+        expTitle.textContent = "✓ Correct Answer";
+      } else {
+        if (selectedIdx !== null) buttons[selectedIdx].classList.add('btn-wrong');
+        buttons[q.ans].classList.add('btn-correct');
+        fx.playBuzzer();
+        expPanel.style.borderLeftColor = 'var(--error-red)';
+        expTitle.textContent = "✗ Incorrect Answer";
+      }
+
+      expBody.innerText = q.exp;
+      expPanel.style.display = 'block';
+      document.getElementById('runnerNextBtn').style.display = 'block';
+    }
+
+    // Timer Auto-Advance Handler (3-second window)
+    function handleTimeout() {
+      if (!isQuestionActive) return;
+      isQuestionActive = false;
+
+      const q = currentTestData.questions[currentQIdx];
+      const buttons = document.querySelectorAll('#runnerChoiceGrid .choice-btn');
+      buttons.forEach(b => b.disabled = true);
+      buttons[q.ans].classList.add('btn-correct');
+      fx.playBuzzer();
+
+      const expPanel = document.getElementById('runnerExpPanel');
+      expPanel.style.borderLeftColor = 'var(--error-red)';
+      document.getElementById('runnerExpTitle').textContent = "⏱ Time's Up!";
+      document.getElementById('runnerExpBody').innerText = `Time expired for this question. ${q.exp}`;
+      expPanel.style.display = 'block';
+
+      // Automatically advance to the next question after 3 seconds
+      setTimeout(() => {
+        nextQuestion();
+      }, 3000);
+    }
+
+    function nextQuestion() {
+      currentQIdx++;
+      if (currentQIdx < currentTestData.questions.length) {
+        loadQuestion(currentQIdx);
+      } else {
+        renderEndScreen();
+      }
+    }
+
+    function renderEndScreen() {
+      document.getElementById('phase2Area').style.display = 'none';
+      const endScreen = document.getElementById('runnerEndScreen');
+      endScreen.style.display = 'block';
+
+      const total = currentTestData.questions.length;
+      const scoreCircle = document.getElementById('endScoreDisplay');
+      const endTitle = document.getElementById('endTitle');
+      const diag = document.getElementById('endDiagnostic');
+      const runnerCard = document.getElementById('runnerCard');
+
+      scoreCircle.textContent = `${score} / ${total}`;
+
+      if (score >= 4) {
+        endTitle.textContent = "High Proficiency Attained (ETS Band 26-30)";
+        scoreCircle.style.color = '#10b981';
+        diag.innerHTML = `<strong>Diagnostic Evaluation:</strong> Excellent pragmatic comprehension! You effectively parsed implicit speaker intent, recognized colloquial idioms (\"see through you like glass\"), and captured operational nuances under strict pacing. Maintain this level by practicing fast academic lectures.`;
+        fx.playFanfare();
+        fireConfetti();
+      } else {
+        endTitle.textContent = "Foundational Review Recommended (ETS Band <22)";
+        scoreCircle.style.color = '#f87171';
+        diag.innerHTML = `<strong>Diagnostic Evaluation:</strong> Review recommended in pragmatic inference and campus idiom identification. Ensure your note-taking categorizes speaker advice, faculty hierarchy, and emotional attitudes. Retake the listening section and check distractor analyses.`;
+        runnerCard.classList.add('shake-fail');
+        setTimeout(() => runnerCard.classList.remove('shake-fail'), 1000);
+        fx.playSad();
+      }
+    }
+
+    function fireConfetti() {
+      const canvas = document.getElementById('confettiCanvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = canvas.parentElement.offsetWidth;
+      canvas.height = canvas.parentElement.offsetHeight;
+      const particles = [];
+      const colors = ['#60a5fa', '#34d399', '#fbbf24', '#f87171', '#a78bfa'];
+      for (let i = 0; i < 90; i++) {
+        particles.push({
+          x: canvas.width / 2, y: canvas.height / 2,
+          dx: (Math.random() - 0.5) * 12, dy: (Math.random() - 0.5) * 12 - 2,
+          size: Math.random() * 4 + 2, color: colors[Math.floor(Math.random() * colors.length)],
+          alpha: 1, decay: Math.random() * 0.015 + 0.005
+        });
+      }
+      function anim() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        let active = false;
+        particles.forEach(p => {
+          if (p.alpha > 0) {
+            active = true;
+            p.x += p.dx; p.y += p.dy; p.dy += 0.15; p.alpha -= p.decay;
+            ctx.save(); ctx.globalAlpha = Math.max(0, p.alpha);
+            ctx.fillStyle = p.color; ctx.beginPath();
+            ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+          }
+        });
+        if (active) requestAnimationFrame(anim);
+      }
+      anim();
+    }
+
+    // ==========================================
+    // STANDALONE HTML COMPILER & EXPORT
+    // ==========================================
+    function generateAndDownload() {
+      const data = extractFormData();
+      const serialized = JSON.stringify(data).replace(/<\/script>/g, '<\\/script>');
+      
+      const fileContent = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${data.title}</title>
+  <style>
+    :root {
+      --bg-slate: #0b1120; --card-bg: #1e293b; --card-border: #334155; --text: #f8fafc; --text-muted: #94a3b8;
+      --valid-green: #059669; --error-red: #dc2626; --accent: #2563eb; --accent-hover: #1d4ed8;
+      --color-opt-a: #2563eb; --color-opt-b: #059669; --color-opt-c: #d97706; --color-opt-d: #7c3aed;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background-color: var(--bg-slate); color: var(--text); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 1.5rem 1rem; }
+    .wrapper { width: 100%; max-width: 840px; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; overflow: hidden; position: relative; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.5); }
+    .instructions { background: #0f172a; border-bottom: 2px solid #334155; padding: 1.25rem; }
+    .instructions h3 { font-size: 1.1rem; color: #60a5fa; margin-bottom: 0.35rem; }
+    .instructions p { font-size: 0.9rem; color: #cbd5e1; line-height: 1.5; }
+    .media-box { width: 100%; background: #000; }
+    .aspect-16-9 { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; display: block; }
+    .audio-dock { padding: 1rem; background: #0f172a; border-top: 1px solid var(--card-border); border-bottom: 1px solid var(--card-border); }
+    audio { width: 100%; height: 40px; }
+    .workspace { padding: 1.75rem; }
+    .phase-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; }
+    .phase-badge { background: #334155; padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.8rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; }
+    .timer-pill { font-size: 1.15rem; font-weight: 800; color: #fbbf24; font-variant-numeric: tabular-nums; }
+    .prompt { font-size: 1.25rem; font-weight: 700; line-height: 1.45; margin-bottom: 1.5rem; }
+    .choice-grid { display: grid; grid-template-columns: 1fr; gap: 0.85rem; margin-bottom: 1.5rem; }
+    .choice-btn { background: #0f172a; border: 2px solid transparent; color: var(--text); padding: 1rem; border-radius: 10px; font-size: 0.95rem; font-weight: 500; text-align: left; cursor: pointer; display: flex; align-items: flex-start; gap: 0.75rem; transition: all 0.2s; }
+    .choice-btn .badge { width: 26px; height: 26px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.8rem; flex-shrink: 0; color: white; }
+    .choice-btn.a .badge { background: var(--color-opt-a); }
+    .choice-btn.b .badge { background: var(--color-opt-b); }
+    .choice-btn.c .badge { background: var(--color-opt-c); }
+    .choice-btn.d .badge { background: var(--color-opt-d); }
+    .choice-btn.a { border-color: rgba(37,99,235,0.4); }
+    .choice-btn.b { border-color: rgba(5,150,105,0.4); }
+    .choice-btn.c { border-color: rgba(217,119,6,0.4); }
+    .choice-btn.d { border-color: rgba(124,58,237,0.4); }
+    .choice-btn:hover:not(:disabled) { transform: translateY(-2px); filter: brightness(1.2); }
+    .choice-btn.correct { background: #065f46 !important; border-color: #10b981 !important; color: white !important; }
+    .choice-btn.wrong { background: #991b1b !important; border-color: #ef4444 !important; color: white !important; }
+    .exp-panel { background: #0f172a; border-left: 4px solid var(--accent); padding: 1.25rem; border-radius: 8px; margin-bottom: 1.5rem; display: none; }
+    .exp-panel h4 { font-size: 0.95rem; color: #60a5fa; margin-bottom: 0.4rem; }
+    .exp-panel p { font-size: 0.9rem; color: #cbd5e1; line-height: 1.5; white-space: pre-line; }
+    .action-btn { width: 100%; padding: 0.9rem; background: var(--accent); color: white; font-weight: 700; border-radius: 8px; border: none; font-size: 1rem; cursor: pointer; }
+    .action-btn:hover { background: var(--accent-hover); }
+    .results { padding: 3rem 1.5rem; text-align: center; display: none; }
+    .score-circle { font-size: 4rem; font-weight: 900; margin: 1rem 0; }
+    .eval-box { background: #0f172a; border: 1px solid var(--card-border); padding: 1.5rem; border-radius: 12px; max-width: 600px; margin: 1.5rem auto; line-height: 1.6; color: #cbd5e1; }
+    @keyframes cardShake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-10px); } 40%, 80% { transform: translateX(10px); } }
+    .shake-fail { animation: cardShake 0.4s ease-in-out 2; }
+    #confettiCanvas { position: absolute; inset: 0; pointer-events: none; z-index: 50; }
+  </style>
+</head>
+<body>
+  <div class="wrapper" id="quizCard">
+    <canvas id="confettiCanvas"></canvas>
+    <div class="instructions">
+      <h3>📝 TOEFL iBT Listening Section</h3>
+      <p>Listen carefully to the conversation and <strong>take notes</strong>. You will hear the audio <strong>only once</strong>. When finished, proceed to Phase 2 to answer 5 questions using your notes under a <strong>45-second timer</strong>.</p>
+    </div>
+    <div class="media-box">
+      <img id="stimImg" class="aspect-16-9" alt="Stimulus Scene" style="display: none;">
+      <div class="audio-dock">
+        <audio id="stimAudio" controls></audio>
+      </div>
+    </div>
+    <div id="p1" class="workspace" style="text-align: center; padding: 2.5rem 1.5rem;">
+      <h3 style="font-size: 1.35rem; margin-bottom: 0.75rem;">Phase 1: Active Listening & Note-Taking</h3>
+      <p style="color: var(--text-muted); max-width: 580px; margin: 0 auto 1.5rem;">Listen to the track above and write your notes. Once you are ready, advance to the timed questions.</p>
+      <button class="action-btn" style="max-width: 280px; margin: 0 auto;" onclick="startQuestions()">Begin Questions →</button>
+    </div>
+    <div id="p2" class="workspace" style="display: none;">
+      <div class="phase-bar">
+        <span class="phase-badge" id="pProgress">Question 1 of 5</span>
+        <div class="timer-pill">⏱ <span id="pTime">45</span>s</div>
+      </div>
+      <div class="prompt" id="pPrompt"></div>
+      <div class="choice-grid" id="pGrid"></div>
+      <div class="exp-panel" id="pExp">
+        <h4 id="pExpTitle">Explanation</h4>
+        <p id="pExpBody"></p>
+      </div>
+      <button class="action-btn" id="pNextBtn" style="display: none;" onclick="goNext()">Next Question →</button>
+    </div>
+    <div id="pResults" class="results">
+      <h2 style="font-size: 1.8rem; margin-bottom: 0.5rem;" id="resTitle">Test Complete</h2>
+      <div class="score-circle" id="resScore">5 / 5</div>
+      <div class="eval-box" id="resDiag"></div>
+      <button class="action-btn" style="width: auto; padding: 0.8rem 2.5rem; margin-top: 1rem;" onclick="location.reload()">Restart Test</button>
+    </div>
+  </div>
+
+  <script>
+    const data = ${serialized};
+    class SoundFX {
+      constructor() { this.ctx = null; }
+      init() { if (!this.ctx) { const AC = window.AudioContext || window.webkitAudioContext; this.ctx = new AC(); } if (this.ctx.state === 'suspended') this.ctx.resume(); }
+      chime() { this.init(); const n = this.ctx.currentTime; const o = this.ctx.createOscillator(); const g = this.ctx.createGain(); o.connect(g); g.connect(this.ctx.destination); o.type = 'triangle'; [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => o.frequency.setValueAtTime(f, n + (i * 0.08))); g.gain.setValueAtTime(0.25, n); g.gain.exponentialRampToValueAtTime(0.001, n + 0.55); o.start(n); o.stop(n + 0.55); }
+      buzzer() { this.init(); const n = this.ctx.currentTime; const o = this.ctx.createOscillator(); const g = this.ctx.createGain(); o.connect(g); g.connect(this.ctx.destination); o.type = 'sawtooth'; o.frequency.setValueAtTime(160, n); o.frequency.linearRampToValueAtTime(110, n + 0.35); g.gain.setValueAtTime(0.25, n); g.gain.exponentialRampToValueAtTime(0.001, n + 0.4); o.start(n); o.stop(n + 0.4); }
+      fanfare() { this.init(); [261.63, 329.63, 392, 523.25].forEach((f, i) => { const t = this.ctx.currentTime + (i * 0.12); const o = this.ctx.createOscillator(); const g = this.ctx.createGain(); o.connect(g); g.connect(this.ctx.destination); o.type = 'square'; o.frequency.value = f; g.gain.setValueAtTime(0.15, t); g.gain.exponentialRampToValueAtTime(0.001, t + (i === 3 ? 0.75 : 0.22)); o.start(t); o.stop(t + (i === 3 ? 0.75 : 0.22)); }); }
+      sad() { this.init(); [196, 185, 174, 164].forEach((f, i) => { const t = this.ctx.currentTime + (i * 0.28); const o = this.ctx.createOscillator(); const g = this.ctx.createGain(); o.connect(g); g.connect(this.ctx.destination); o.type = 'sawtooth'; o.frequency.setValueAtTime(f, t); o.frequency.linearRampToValueAtTime(f - 4, t + 0.26); g.gain.setValueAtTime(0.2, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.27); o.start(t); o.stop(t + 0.28); }); }
+    }
+    const fx = new SoundFX();
+    let qIdx = 0, score = 0, timer = null, remaining = data.timer || 45, active = false;
+
+    const img = document.getElementById('stimImg');
+    const audio = document.getElementById('stimAudio');
+    if (data.image) { img.src = data.image; img.style.display = 'block'; }
+    if (data.audio) { audio.src = data.audio; }
+
+    function startQuestions() {
+      audio.pause(); audio.controls = false;
+      document.getElementById('p1').style.display = 'none';
+      document.getElementById('p2').style.display = 'block';
+      loadQ(0);
+    }
+    function loadQ(idx) {
+      clearInterval(timer);
+      active = true;
+      const q = data.questions[idx];
+      document.getElementById('pProgress').textContent = 'Question ' + (idx + 1) + ' of ' + data.questions.length;
+      document.getElementById('pPrompt').textContent = q.prompt;
+      const grid = document.getElementById('pGrid');
+      grid.innerHTML = '';
+      document.getElementById('pExp').style.display = 'none';
+      document.getElementById('pNextBtn').style.display = 'none';
+
+      ['a', 'b', 'c', 'd'].forEach((cls, i) => {
+        const btn = document.createElement('button');
+        btn.className = 'choice-btn ' + cls;
+        btn.innerHTML = '<span class="badge">' + ['A', 'B', 'C', 'D'][i] + '</span><span>' + q.opts[i] + '</span>';
+        btn.onclick = () => choose(i);
+        grid.appendChild(btn);
+      });
+
+      remaining = data.timer || 45;
+      document.getElementById('pTime').textContent = remaining;
+      timer = setInterval(() => {
+        remaining--;
+        document.getElementById('pTime').textContent = remaining;
+        if (remaining <= 0) { clearInterval(timer); timeout(); }
+      }, 1000);
+    }
+    function choose(sel) {
+      if (!active) return;
+      active = false;
+      clearInterval(timer);
+      const q = data.questions[qIdx];
+      const btns = document.querySelectorAll('#pGrid .choice-btn');
+      btns.forEach(b => b.disabled = true);
+      const exp = document.getElementById('pExp');
+
+      if (sel === q.ans) {
+        btns[sel].classList.add('correct');
+        fx.chime();
+        score++;
+        exp.style.borderLeftColor = 'var(--valid-green)';
+        document.getElementById('pExpTitle').textContent = '✓ Correct Answer';
+      } else {
+        if (sel !== null) btns[sel].classList.add('wrong');
+        btns[q.ans].classList.add('correct');
+        fx.buzzer();
+        exp.style.borderLeftColor = 'var(--error-red)';
+        document.getElementById('pExpTitle').textContent = '✗ Incorrect Answer';
+      }
+      document.getElementById('pExpBody').innerText = q.exp;
+      exp.style.display = 'block';
+      document.getElementById('pNextBtn').style.display = 'block';
+    }
+    function timeout() {
+      if (!active) return;
+      active = false;
+      const q = data.questions[qIdx];
+      const btns = document.querySelectorAll('#pGrid .choice-btn');
+      btns.forEach(b => b.disabled = true);
+      btns[q.ans].classList.add('correct');
+      fx.buzzer();
+      const exp = document.getElementById('pExp');
+      exp.style.borderLeftColor = 'var(--error-red)';
+      document.getElementById('pExpTitle').textContent = "⏱ Time's Up!";
+      document.getElementById('pExpBody').innerText = 'Time expired for this question.\\n\\n' + q.exp;
+      exp.style.display = 'block';
+      setTimeout(() => goNext(), 3000);
+    }
+    function goNext() {
+      qIdx++;
+      if (qIdx < data.questions.length) { loadQ(qIdx); } else { end(); }
+    }
+    function end() {
+      document.getElementById('p2').style.display = 'none';
+      document.getElementById('pResults').style.display = 'block';
+      const sc = document.getElementById('resScore');
+      sc.textContent = score + ' / ' + data.questions.length;
+      const diag = document.getElementById('resDiag');
+      if (score >= 4) {
+        document.getElementById('resTitle').textContent = 'High Proficiency Attained (ETS Band 26-30)';
+        sc.style.color = '#10b981';
+        diag.innerHTML = '<strong>Diagnostic Evaluation:</strong> Excellent pragmatic comprehension! You captured implicit intent and operational nuance. Maintain this pace with academic lectures.';
+        fx.fanfare();
+        confetti();
+      } else {
+        document.getElementById('resTitle').textContent = 'Foundational Review Recommended (ETS Band <22)';
+        sc.style.color = '#f87171';
+        diag.innerHTML = '<strong>Diagnostic Evaluation:</strong> Review recommended in pragmatic inference and campus idioms. Retake the listening section and check the distractor notes.';
+        document.getElementById('quizCard').classList.add('shake-fail');
+        fx.sad();
+      }
+    }
+    function confetti() {
+      const c = document.getElementById('confettiCanvas'), ctx = c.getContext('2d');
+      c.width = c.parentElement.offsetWidth; c.height = c.parentElement.offsetHeight;
+      const pts = [], cols = ['#60a5fa', '#34d399', '#fbbf24', '#f87171', '#a78bfa'];
+      for (let i = 0; i < 90; i++) pts.push({ x: c.width/2, y: c.height/2, dx: (Math.random()-0.5)*12, dy: (Math.random()-0.5)*12-2, s: Math.random()*4+2, col: cols[Math.floor(Math.random()*cols.length)], a: 1, d: Math.random()*0.015+0.005 });
+      function loop() {
+        ctx.clearRect(0,0,c.width,c.height); let run = false;
+        pts.forEach(p => { if (p.a > 0) { run = true; p.x += p.dx; p.y += p.dy; p.dy += 0.15; p.a -= p.d; ctx.save(); ctx.globalAlpha = Math.max(0, p.a); ctx.fillStyle = p.col; ctx.beginPath(); ctx.arc(p.x, p.y, p.s, 0, Math.PI*2); ctx.fill(); ctx.restore(); } });
+        if (run) requestAnimationFrame(loop);
+      }
+      loop();
+    }
+  <\/script>
+</body>
+</html>`;
+
+      const blob = new Blob([fileContent], { type: 'text/html;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${data.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}.html`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+  </script>
+</body>
+</html>
